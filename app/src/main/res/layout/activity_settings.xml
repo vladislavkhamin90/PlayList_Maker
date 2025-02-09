@@ -14,24 +14,17 @@
         app:navigationIcon="@drawable/arrow_back"
         app:titleTextAppearance="@style/title"
         android:layout_marginBottom="@dimen/_24dp"/>
-    <LinearLayout
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_56dp"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/white_theme_settings_text"
-            android:text="@string/dark_theme" />
-        <Switch
-            android:id="@+id/switch1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:trackTint="@color/color_switch_1"
-            android:thumbTint="@color/gray"
-            android:layout_marginEnd="@dimen/_16dp"
-            android:layout_gravity="center_vertical" />
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/_16dp"
+        android:paddingVertical="20dp"
+        android:text="@string/dark_theme"
+        android:thumbTint="@color/switch_thumb_color"
+        android:trackTint="@color/switch_track_color"
+        android:textSize="@dimen/_16sp" />
 
     <TextView
         android:layout_width="match_parent"
