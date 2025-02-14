@@ -30,21 +30,24 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
         android:text="@string/share_app"
-        style="@style/white_theme_settings_text"
-        app:drawableEndCompat="@drawable/share_icon" />
+
+        style="@style/settings_text"
+        app:drawableEndCompat="@drawable/share_icon"
+
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
         android:text="@string/support"
-        style="@style/white_theme_settings_text"
+        style="@style/settings_text"
         app:drawableEndCompat="@drawable/support_icon" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
         android:text="@string/user_agreement"
-        style="@style/white_theme_settings_text"
+        style="@style/settings_text"
         app:drawableEndCompat="@drawable/mark_right" />
 
 </LinearLayout>
