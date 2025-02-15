@@ -4,8 +4,8 @@
         <item name="android:colorBackground">@color/dark_theme</item>
     </style>
 
-    <style name="Prime_settings" parent="Prime_theme">
-
+    <style name="Prime_fix" parent="Prime_theme">
+        <item name="android:colorBackground">@color/dark_theme</item>
     </style>
 
     <style name="search_button" parent="button_style">
@@ -34,6 +34,21 @@
         <item name="android:paddingEnd">@dimen/_16dp</item>
         <item name="android:drawableTint">@color/white</item>
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="search_title">
+        <item name="navigationIcon">@drawable/arrow_back_white</item>
+        <item name="titleTextColor">@color/white</item>
+    </style>
+
+    <style name="search_edit_text">
+        <item name="android:drawableStart">@drawable/search_icon</item>
+        <item name="android:textColorHint">@color/dark_theme</item>
+        <item name="android:drawableTint">@color/dark_theme</item>
+    </style>
+
+    <style name="container">
+        <item name="android:background">@drawable/rectangle_white</item>
     </style>
 
 </resources>

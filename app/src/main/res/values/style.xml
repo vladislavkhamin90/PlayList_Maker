@@ -6,6 +6,10 @@
         <item name="android:fontFamily">@font/ys_text</item>
     </style>
 
+    <style name="title_search" parent="title">
+        <item name="android:textSize">22sp</item>
+    </style>
+
     <style name="button_style" parent="TextAppearance.MaterialComponents.Button">
         <item name="android:textSize">@dimen/_22sp</item>
         <item name="android:layout_marginTop">@dimen/_16dp</item>
@@ -18,7 +22,6 @@
         <item name="android:backgroundTint">@color/white</item>
         <item name="fontFamily">@font/ys_text</item>
     </style>
-
 
     <style name="icon_pos">
         <item name="android:layout_marginRight">@dimen/_12dp</item>

@@ -17,10 +17,11 @@
             android:exported="false" />
         <activity
             android:name=".SearchActivity"
+            android:theme="@style/Prime_fix"
             android:exported="false" />
         <activity
             android:name=".SettingsActivity"
-            android:theme="@style/Prime_settings"
+            android:theme="@style/Prime_fix"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
