@@ -14,4 +14,8 @@
     <string name="text">Спасибо разработчикам и разработчицам за крутое приложение</string>
     <string name="mail">vladislavkhamin90@gmail.com</string>
     <string name="offer">https://yandex.ru/legal/practicum_offer/</string>
+    <string name="send">Отправить</string>
+    <string name="open_url">Открыть ссылку</string>
+    <string name="mailto">mailto:</string>
+    <string name="text_plain">text/plain</string>
 </resources>

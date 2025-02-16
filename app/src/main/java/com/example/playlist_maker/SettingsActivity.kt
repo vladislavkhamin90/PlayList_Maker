@@ -32,11 +32,12 @@ class SettingsActivity : AppCompatActivity() {
 
         shareLine.setOnClickListener{
             val urlAndroidDev = getString(R.string.url_android_dev)
+            val share = getString(R.string.share_app)
             val url = Uri.parse(urlAndroidDev)
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, url)
-            startActivity(Intent.createChooser(intent, "Поделиться ссылкой"))
+            startActivity(Intent.createChooser(intent, share))
         }
 
         supportLine.setOnClickListener{
@@ -44,19 +45,23 @@ class SettingsActivity : AppCompatActivity() {
             val title = getString(R.string.title)
             val text = getString(R.string.text)
             val mail = getString(R.string.mail)
+            val send = getString(R.string.send)
+            val mailto = getString(R.string.mailto)
+            val textPlain = getString(R.string.text_plain)
             intent.putExtra(Intent.EXTRA_EMAIL, mail)
             intent.putExtra(Intent.EXTRA_SUBJECT, title)
             intent.putExtra(Intent.EXTRA_TEXT, text)
-            intent.data = Uri.parse("mailto:")
-            intent.type = "text/plain"
-            startActivity(Intent.createChooser(intent, "Отправить"))
+            intent.data = Uri.parse(mailto)
+            intent.type = textPlain
+            startActivity(Intent.createChooser(intent, send))
         }
 
         agreementLine.setOnClickListener{
             val offer = getString(R.string.offer)
+            val open = getString(R.string.open_url)
             val url = Uri.parse(offer)
             val intent = Intent(Intent.ACTION_VIEW, url)
-            startActivity(Intent.createChooser(intent,"Открыть ссылку"))
+            startActivity(Intent.createChooser(intent,open))
         }
     }
 }

@@ -7,23 +7,22 @@
     <style name="Prime_fix" parent="Prime_theme">
         <item name="android:colorBackground">@color/white</item>
     </style>
+    
+    <style name="button_general" parent="button_style">
+        <item name="iconTint">@color/black</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 
-    <style name="search_button" parent="button_style">
+    <style name="search_button" parent="button_general">
         <item name="icon">@drawable/search_icon</item>
-        <item name="iconTint">@color/black</item>
-        <item name="android:textColor">@color/black</item>
     </style>
 
-    <style name="media_button" parent="button_style">
+    <style name="media_button" parent="button_general">
         <item name="icon">@drawable/media_icon</item>
-        <item name="iconTint">@color/black</item>
-        <item name="android:textColor">@color/black</item>
     </style>
 
-    <style name="settings_button" parent="button_style">
+    <style name="settings_button" parent="button_general">
         <item name="icon">@drawable/settings_icon</item>
-        <item name="iconTint">@color/black</item>
-        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="settings_text">
