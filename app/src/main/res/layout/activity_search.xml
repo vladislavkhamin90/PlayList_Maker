@@ -11,9 +11,9 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
-        style="@style/search_title"
         app:title="@string/search"
-        app:titleTextAppearance="@style/title_search"
+        app:titleTextAppearance="@style/title_attrs_search"
+        style="@style/title_search"
         android:layout_marginBottom ="@dimen/_8dp"/>
 
     <LinearLayout

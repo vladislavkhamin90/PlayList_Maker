@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
         app:title="@string/settings"
-        app:navigationIcon="@drawable/arrow_back"
-        app:titleTextAppearance="@style/title"
+        app:titleTextAppearance="@style/title_attrs_settings"
+        style="@style/title_settings"
         android:layout_marginBottom="@dimen/_24dp" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial

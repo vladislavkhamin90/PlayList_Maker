@@ -51,4 +51,18 @@
         <item name="android:background">@drawable/rectangle_white</item>
     </style>
 
+    <style name="title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textColor">@color/white</item>
+        <item name="navigationIcon">@drawable/arrow_back_white</item>
+        <item name="android:fontFamily">@font/ys_text</item>
+    </style>
+
+    <style name="title_search" parent="title">
+        <item name="android:textSize">@dimen/_26sp</item>
+    </style>
+
+    <style name="title_settings" parent="title">
+        <item name="android:textSize">@dimen/_22sp</item>
+    </style>
+
 </resources>

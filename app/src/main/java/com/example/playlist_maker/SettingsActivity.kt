@@ -31,7 +31,8 @@ class SettingsActivity : AppCompatActivity() {
         val agreementLine = findViewById<TextView>(R.id.agreement)
 
         shareLine.setOnClickListener{
-            val url = Uri.parse("https://practicum.yandex.ru/profile/android-developer/")
+            val urlAndroidDev = getString(R.string.url_android_dev)
+            val url = Uri.parse(urlAndroidDev)
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, url)
@@ -40,19 +41,20 @@ class SettingsActivity : AppCompatActivity() {
 
         supportLine.setOnClickListener{
             val intent = Intent(Intent.ACTION_SEND)
-            val title = "Сообщение разработчикам и разработчицам приложения Playlist Maker"
-            val text = "Спасибо разработчикам и разработчицам за крутое приложение"
-            val mail = "vladislavkhamin90@gmail.com"
+            val title = getString(R.string.title)
+            val text = getString(R.string.text)
+            val mail = getString(R.string.mail)
             intent.putExtra(Intent.EXTRA_EMAIL, mail)
             intent.putExtra(Intent.EXTRA_SUBJECT, title)
             intent.putExtra(Intent.EXTRA_TEXT, text)
             intent.data = Uri.parse("mailto:")
             intent.type = "text/plain"
-            startActivity(Intent.createChooser(intent, "Send Email"))
+            startActivity(Intent.createChooser(intent, "Отправить"))
         }
 
         agreementLine.setOnClickListener{
-            val url = Uri.parse("https://yandex.ru/legal/practicum_offer/")
+            val offer = getString(R.string.offer)
+            val url = Uri.parse(offer)
             val intent = Intent(Intent.ACTION_VIEW, url)
             startActivity(Intent.createChooser(intent,"Открыть ссылку"))
         }
