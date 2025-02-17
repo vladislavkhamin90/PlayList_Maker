@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/settings"
+    android:orientation="vertical">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_56dp"
+        app:title="@string/settings"
+        app:titleTextAppearance="@style/title_attrs_settings"
+        style="@style/title_settings"
+        android:layout_marginBottom="@dimen/_24dp" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/_16dp"
+        android:paddingVertical="20dp"
+        android:text="@string/dark_theme"
+        android:thumbTint="@color/switch_thumb_color"
+        android:trackTint="@color/switch_track_color"
+        android:textSize="@dimen/_16sp" />
+
+    <TextView
+        android:id="@+id/sharing"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_56dp"
+        android:text="@string/share_app"
+        style="@style/settings_text"
+        app:drawableEndCompat="@drawable/share_icon" />
+
+    <TextView
+        android:id="@+id/support"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_56dp"
+        android:text="@string/support"
+        style="@style/settings_text"
+        app:drawableEndCompat="@drawable/support_icon" />
+
+    <TextView
+        android:id="@+id/agreement"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_56dp"
+        android:text="@string/user_agreement"
+        style="@style/settings_text"
+        app:drawableEndCompat="@drawable/mark_right" />
+
+</LinearLayout>
