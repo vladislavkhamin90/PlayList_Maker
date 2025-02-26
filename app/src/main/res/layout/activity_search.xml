@@ -46,11 +46,20 @@
             android:layout_height="match_parent"
             android:foregroundGravity="center"
             android:layout_gravity="end"
+            android:layout_marginBottom="@dimen/_24dp"
             android:layout_marginEnd="@dimen/_8dp"
             android:src="@drawable/baseline_clear_24"
             android:visibility="gone"
             />
 
     </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycle_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_list"
+        />
+
 
 </LinearLayout>

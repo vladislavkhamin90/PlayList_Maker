@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    style="@style/item_list_card_view"
+    app:cardCornerRadius="0dp"
+    android:layout_height="61dp">
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginVertical="@dimen/_8dp"
+        android:layout_marginStart="13dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="33dp"
+        android:layout_marginStart="66dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginVertical="14dp"
+        > 
+        
+        <TextView
+            android:id="@+id/title_music"
+            android:layout_width="match_parent"
+            android:textSize="@dimen/_16sp"
+            style="@style/item_title_text_view"
+            android:ellipsize="end"
+            android:text="Some text"
+            android:layout_height="19dp"/>
+
+        <LinearLayout
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="13dp">
+
+            <TextView
+                android:id="@+id/artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/search_items_subtext"/>
+
+            <View
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:layout_margin="5dp"
+                style="@style/circle"
+                />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/search_items_subtext"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/arrow_btn"
+        android:layout_width="@dimen/_24dp"
+        android:layout_height="@dimen/_24dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="@dimen/_12dp"
+        android:layout_marginBottom="19dp"
+        android:layout_marginTop="18dp"
+        style="@style/item_arrow"
+        />
+
+
+</androidx.cardview.widget.CardView>
+
+<!--<TextView-->
+<!--android:id="@+id/artist"-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="13dp"-->
+<!--android:textColor="@color/gray"-->
+<!--android:textSize="11sp"-->
+<!--android:text="Some text"-->
+<!--android:layout_alignParentBottom="true"-->
+<!--    />-->
