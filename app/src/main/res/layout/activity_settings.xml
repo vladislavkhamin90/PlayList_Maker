@@ -22,8 +22,8 @@
         android:paddingHorizontal="@dimen/_16dp"
         android:paddingVertical="20dp"
         android:text="@string/dark_theme"
-        android:thumbTint="@color/switch_thumb_color"
-        android:trackTint="@color/switch_track_color"
+        app:thumbTint="@color/switch_thumb_color"
+        app:trackTint="@color/switch_track_color"
         android:textSize="@dimen/_16sp" />
 
     <TextView
