@@ -18,4 +18,5 @@
     <string name="open_url">Открыть ссылку</string>
     <string name="mailto">mailto:</string>
     <string name="text_plain">text/plain</string>
+    <string name="some_text">Some text</string>
 </resources>

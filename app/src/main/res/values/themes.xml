@@ -64,5 +64,26 @@
         <item name="android:textSize">@dimen/_22sp</item>
     </style>
 
+    <style name="item_list_card_view">
+        <item name="android:backgroundTint">@color/white</item>
+    </style>
+
+    <style name="item_title_text_view">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="search_items_subtext" parent="search_items">
+        <item name="android:fontFamily">@font/ys_text</item>
+        <item name="android:textColor">@color/gray</item>
+    </style>
+
+    <style name="circle">
+        <item name="android:background">@drawable/circle_gray</item>
+    </style>
+
+    <style name="item_arrow">
+        <item name="android:background">@drawable/mark_right</item>
+    </style>
+
 
 </resources>
