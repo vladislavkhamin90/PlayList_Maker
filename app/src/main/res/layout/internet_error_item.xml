@@ -29,8 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:text="@string/update"
-        android:textAlignment="center"
-        android:textSize="16sp"
+        android:textSize="14sp"
         style="@style/internet_error_btn"
         />
 

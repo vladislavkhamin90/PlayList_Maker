@@ -3,7 +3,7 @@ package com.example.playlist_maker
 import com.google.gson.annotations.SerializedName
 
 
-class Songs(val result: List<SongsResult>)
+class Songs(val results: List<SongsResult>)
 
 
 data class SongsResult(
