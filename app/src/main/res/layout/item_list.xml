@@ -5,11 +5,15 @@
     style="@style/item_list_card_view"
     app:cardCornerRadius="0dp"
     android:layout_height="61dp">
+
     <ImageView
         android:id="@+id/image"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginVertical="@dimen/_8dp"
+        android:layout_marginEnd="@dimen/_8dp"
+        android:clipToOutline="true"
+        android:background="@drawable/placeholder"
         android:layout_marginStart="13dp"/>
 
     <RelativeLayout
@@ -23,11 +27,13 @@
         <TextView
             android:id="@+id/title_music"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textSize="@dimen/_16sp"
             style="@style/item_title_text_view"
             android:ellipsize="end"
-            android:text="Some text"
-            android:layout_height="19dp"/>
+            android:maxLines="1"
+            android:gravity="center_vertical"
+            android:text="Some text  y   g"/>
 
         <LinearLayout
             android:layout_alignParentBottom="true"
@@ -44,7 +50,10 @@
             <View
                 android:layout_width="3dp"
                 android:layout_height="3dp"
-                android:layout_margin="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="6dp"
                 style="@style/circle"
                 />
 
@@ -71,13 +80,3 @@
 
 
 </androidx.cardview.widget.CardView>
-
-<!--<TextView-->
-<!--android:id="@+id/artist"-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="13dp"-->
-<!--android:textColor="@color/gray"-->
-<!--android:textSize="11sp"-->
-<!--android:text="Some text"-->
-<!--android:layout_alignParentBottom="true"-->
-<!--    />-->

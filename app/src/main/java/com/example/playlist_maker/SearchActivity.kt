@@ -131,7 +131,7 @@ class SearchActivity : AppCompatActivity() {
                                 fillTrackList(result)
                             }
                         } else{
-                            Log.i("MyLog", "List is empty")
+                            Log.i("MyLog", "TrackList is null")
                         }
                     } else{
                         internetError()

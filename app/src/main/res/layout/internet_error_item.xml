@@ -27,7 +27,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/update_btn"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="wrap_content"
         android:text="@string/update"
         android:textSize="14sp"
         style="@style/internet_error_btn"
