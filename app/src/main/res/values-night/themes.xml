@@ -86,4 +86,26 @@
         <item name="android:background">@drawable/mark_right_dark_theme</item>
     </style>
 
+    <style name="search_error_draw">
+        <item name="android:background">@drawable/not_found_dark_theme</item>
+    </style>
+
+    <style name="error_text" parent="general_error_text">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="search_error_background">
+        <item name="android:background">@color/dark_theme</item>
+    </style>
+
+    <style name="internet_error_draw">
+        <item name="android:background">@drawable/no_internet_dark_theme</item>
+    </style>
+
+    <style name="internet_error_btn" parent="general_internet_error_btn">
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/dark_theme</item>
+    </style>
+
+
 </resources>
