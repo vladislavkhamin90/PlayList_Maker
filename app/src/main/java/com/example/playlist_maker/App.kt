@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 
 const val THEME_KEY = "THEME_KEY"
 const val THEME_PREFERENCES = "THEME_PREFERENCES"
+const val DEFAULT_THEME = false
 
 class App : Application() {
     private lateinit var sharedPrefs: SharedPreferences
@@ -22,7 +23,7 @@ class App : Application() {
     }
 
     fun applySavedTheme() {
-        val darkTheme = sharedPrefs.getBoolean(THEME_KEY, false)
+        val darkTheme = sharedPrefs.getBoolean(THEME_KEY, DEFAULT_THEME)
         applyTheme(darkTheme)
     }
 
@@ -36,5 +37,5 @@ class App : Application() {
         )
     }
 
-    fun isDarkTheme(): Boolean = sharedPrefs.getBoolean(THEME_KEY, false)
+    fun isDarkTheme(): Boolean = sharedPrefs.getBoolean(THEME_KEY, DEFAULT_THEME)
 }

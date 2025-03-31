@@ -4,8 +4,10 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+const val APP_PREF = "APP_PREFS"
+
 class SearchHistory(context: Context) {
-    private val sharedPref = context.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
+    private val sharedPref = context.applicationContext.getSharedPreferences(APP_PREF, Context.MODE_PRIVATE)
     private val gson = Gson()
 
     companion object {

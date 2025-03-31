@@ -102,11 +102,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
-            val existingIndex = list.indexOfFirst { it.id == track.id }
-            if (existingIndex != -1) {
-                list.removeAt(existingIndex)
-            }
-
+            list.removeAll { it.id == track.id }
             list.add(0, track)
             if (list.size > 10) {
                 list.removeAt(10)
@@ -154,6 +150,7 @@ class SearchActivity : AppCompatActivity() {
             recyclerView.adapter = TrackAdapter(trackList, onItemClicked = { track ->
                 addHistoryUniqueItem(trackListHistory, track)
                 historyPreferences.saveTrackHistory(trackListHistory)
+                historyAdapter.notifyDataSetChanged()
             })
             recyclerView.isVisible = true
         }
