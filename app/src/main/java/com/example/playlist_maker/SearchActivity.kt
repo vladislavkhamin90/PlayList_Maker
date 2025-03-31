@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +33,11 @@ const val BASE_URL = "https://itunes.apple.com"
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var inputEditText: EditText
+    private lateinit var historyPreferences: SearchHistory
 
+    private lateinit var historyAdapter: TrackAdapter
+
+    private lateinit var historyRecyclerView: RecyclerView
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -42,6 +47,7 @@ class SearchActivity : AppCompatActivity() {
     private val songs = retrofit.create(SongsApi::class.java)
 
     private val trackList: MutableList<Track> = mutableListOf()
+    private val trackListHistory: MutableList<Track> = mutableListOf()
 
     var textSearch = ""
 
@@ -62,16 +68,50 @@ class SearchActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recycle_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-
         inputEditText = findViewById(R.id.inputEditText)
         val clearButton = findViewById<ImageView>(R.id.clearIcon)
         val tittleBackIcon = findViewById<Toolbar>(R.id.title)
         val mainView = findViewById<LinearLayout>(R.id.main)
+        val youSearchText = findViewById<TextView>(R.id.you_search)
+        val clearHistoryBtn = findViewById<Button>(R.id.clear_history_btn)
+        historyRecyclerView = findViewById<RecyclerView>(R.id.historyRecyclerView)
+
+        historyPreferences = SearchHistory(this)
+        trackListHistory.addAll((historyPreferences.loadTrackHistory()))
+
+        historyAdapter = TrackAdapter(trackListHistory, onItemClicked = {})
+        historyRecyclerView.adapter = historyAdapter
 
         val inflater = LayoutInflater.from(this)
         val internetError = inflater.inflate(R.layout.internet_error_item, mainView, false)
         val searchError = inflater.inflate(R.layout.search_error_item, mainView, false)
         val updateBtn = internetError.findViewById<Button>(R.id.update_btn)
+
+        fun historyVisibility(bool: Boolean) {
+            youSearchText.isVisible = bool
+            clearHistoryBtn.isVisible = bool
+            historyRecyclerView.isVisible = bool
+            if(bool){
+                historyRecyclerView.adapter = historyAdapter
+            }
+        }
+
+        clearHistoryBtn.setOnClickListener {
+            trackListHistory.clear()
+            historyRecyclerView.adapter = historyAdapter
+        }
+
+        fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
+            val existingIndex = list.indexOfFirst { it.id == track.id }
+            if (existingIndex != -1) {
+                list.removeAt(existingIndex)
+            }
+
+            list.add(0, track)
+            if (list.size > 10) {
+                list.removeAt(10)
+            }
+        }
 
         internetError.isVisible = false
         searchError.isVisible = false
@@ -83,7 +123,7 @@ class SearchActivity : AppCompatActivity() {
             trackList.clear()
         }
 
-        fun searchError(){
+        fun searchError() {
             searchError.isVisible = true
             trackList.clear()
         }
@@ -95,7 +135,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         fun fillTrackList(list: List<SongsResult>) {
-            if(trackList.isNotEmpty()){
+            if (trackList.isNotEmpty()) {
                 trackList.clear()
             }
             for (i in list) {
@@ -105,16 +145,20 @@ class SearchActivity : AppCompatActivity() {
                         i.artistName,
                         SimpleDateFormat("mm:ss", Locale.getDefault()).format(i.trackTimeMillis)
                             .toString(),
-                        i.artworkUrl100
+                        i.artworkUrl100,
+                        i.id
                     )
                 )
             }
 
-            recyclerView.adapter = TrackAdapter(trackList)
+            recyclerView.adapter = TrackAdapter(trackList, onItemClicked = { track ->
+                addHistoryUniqueItem(trackListHistory, track)
+                historyPreferences.saveTrackHistory(trackListHistory)
+            })
             recyclerView.isVisible = true
         }
 
-        fun search(){
+        fun search() {
             clearAllError()
             songs.search(inputEditText.text.toString()).enqueue(object : Callback<Songs> {
                 override fun onResponse(
@@ -127,13 +171,13 @@ class SearchActivity : AppCompatActivity() {
                             @Nullable
                             if (result.isEmpty()) {
                                 searchError()
-                            }else{
+                            } else {
                                 fillTrackList(result)
                             }
-                        } else{
+                        } else {
                             Log.i("MyLog", "TrackList is null")
                         }
-                    } else{
+                    } else {
                         internetError()
                     }
                 }
@@ -142,10 +186,15 @@ class SearchActivity : AppCompatActivity() {
                     internetError()
                     Log.i("MyLog", t.toString())
                 }
+
             })
+            if(inputEditText.text.isEmpty()){
+                clearAllError()
+                historyVisibility(true)
+            }
         }
 
-        updateBtn.setOnClickListener{
+        updateBtn.setOnClickListener {
             search()
         }
 
@@ -167,21 +216,21 @@ class SearchActivity : AppCompatActivity() {
         }
 
         val simpleTextWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+            override fun beforeTextChanged(s: CharSequence?,start: Int,count: Int,after: Int) {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 textSearch = s.toString()
                 clearButton.isVisible = !s.isNullOrEmpty()
+                historyVisibility((inputEditText.hasFocus() && inputEditText.text.isEmpty()))
             }
 
             override fun afterTextChanged(s: Editable?) {
-
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
     }
+
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
@@ -202,5 +251,10 @@ class SearchActivity : AppCompatActivity() {
 
         textSearch = savedInstanceState.getString(KEY, "")
         inputEditText.setText(textSearch)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        historyPreferences.saveTrackHistory(trackListHistory)
     }
 }
