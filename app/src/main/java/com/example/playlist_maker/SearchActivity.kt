@@ -102,11 +102,12 @@ class SearchActivity : AppCompatActivity() {
         }
 
         fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
-            list.removeAll { it.id == track.id }
+            list.filter { it.id == track.id }.toMutableList()
             list.add(0, track)
             if (list.size > 10) {
-                list.removeAt(10)
+                list.removeAt(list.lastIndex)
             }
+            historyPreferences.saveTrackHistory(trackListHistory)
         }
 
         internetError.isVisible = false
@@ -248,10 +249,5 @@ class SearchActivity : AppCompatActivity() {
 
         textSearch = savedInstanceState.getString(KEY, "")
         inputEditText.setText(textSearch)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        historyPreferences.saveTrackHistory(trackListHistory)
     }
 }
