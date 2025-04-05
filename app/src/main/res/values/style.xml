@@ -47,6 +47,10 @@
         <item name="android:textAllCaps">false</item>
         <item name="cornerRadius">54dp</item>
     </style>
+    
+    <style name="description_track_general">
+        <item name="android:textSize">13sp</item>
+    </style>
 
 
 </resources>

@@ -1,5 +1,6 @@
 package com.example.playlist_maker
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -48,6 +50,7 @@ class SearchActivity : AppCompatActivity() {
 
     private val trackList: MutableList<Track> = mutableListOf()
     private val trackListHistory: MutableList<Track> = mutableListOf()
+    private val gson = Gson()
 
     var textSearch = ""
 
@@ -77,15 +80,26 @@ class SearchActivity : AppCompatActivity() {
         historyRecyclerView = findViewById<RecyclerView>(R.id.historyRecyclerView)
 
         historyPreferences = SearchHistory(this)
-        trackListHistory.addAll((historyPreferences.loadTrackHistory()))
+        trackListHistory.addAll((historyPreferences.load()))
 
-        historyAdapter = TrackAdapter(trackListHistory, onItemClicked = {})
+        fun sendAndGoAudioPlayer(track: Track){
+            val intent = Intent(this, AudioPlayer::class.java).apply {
+                putExtra(KEY, gson.toJson(track))
+            }
+            startActivity(intent)
+        }
+
+        historyAdapter = TrackAdapter(trackListHistory, onItemClicked = { track ->
+            sendAndGoAudioPlayer(track)
+        })
         historyRecyclerView.adapter = historyAdapter
 
         val inflater = LayoutInflater.from(this)
         val internetError = inflater.inflate(R.layout.internet_error_item, mainView, false)
         val searchError = inflater.inflate(R.layout.search_error_item, mainView, false)
         val updateBtn = internetError.findViewById<Button>(R.id.update_btn)
+
+
 
         fun historyVisibility(bool: Boolean) {
             youSearchText.isVisible = bool
@@ -107,7 +121,7 @@ class SearchActivity : AppCompatActivity() {
             if (list.size > 10) {
                 list.removeAt(list.lastIndex)
             }
-            historyPreferences.saveTrackHistory(trackListHistory)
+            historyPreferences.save(trackListHistory)
         }
 
         internetError.isVisible = false
@@ -135,23 +149,28 @@ class SearchActivity : AppCompatActivity() {
             if (trackList.isNotEmpty()) {
                 trackList.clear()
             }
-            for (i in list) {
+            for (item in list) {
                 trackList.add(
                     Track(
-                        i.trackName,
-                        i.artistName,
-                        SimpleDateFormat("mm:ss", Locale.getDefault()).format(i.trackTimeMillis)
+                        item.trackName,
+                        item.artistName,
+                        SimpleDateFormat("mm:ss", Locale.getDefault()).format(item.trackTimeMillis)
                             .toString(),
-                        i.artworkUrl100,
-                        i.id
+                        item.artworkUrl100,
+                        item.id,
+                        item.collectionName,
+                        item.releaseDate,
+                        item.primaryGenreName,
+                        item.country
                     )
                 )
             }
 
             recyclerView.adapter = TrackAdapter(trackList, onItemClicked = { track ->
                 addHistoryUniqueItem(trackListHistory, track)
-                historyPreferences.saveTrackHistory(trackListHistory)
+                historyPreferences.save(trackListHistory)
                 historyAdapter.notifyDataSetChanged()
+                sendAndGoAudioPlayer(track)
             })
             recyclerView.isVisible = true
         }

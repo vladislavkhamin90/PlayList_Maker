@@ -107,5 +107,38 @@
         <item name="android:textColor">@color/dark_theme</item>
     </style>
 
+    <style name="description_track_left" parent="description_track_general">
+        <item name="android:textColor">@color/gray</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+    <style name="description_track_right" parent="description_track_general">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">end|center_vertical</item>
+    </style>
+
+    <style name="audio_player_background">
+        <item name="android:background">@color/dark_theme</item>
+    </style>
+
+    <style name="title_audio_player">
+        <item name="android:navigationIcon">@drawable/arrow_back_white</item>
+    </style>
+
+    <style name="player_text_color">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="queue_btn">
+        <item name="android:background">@drawable/queue_button_dark</item>
+    </style>
+
+    <style name="play_btn">
+        <item name="android:background">@drawable/play_button_dark</item>
+    </style>
+
+    <style name="favor_btn">
+        <item name="android:background">@drawable/favorite_button_dark</item>
+    </style>
 
 </resources>
