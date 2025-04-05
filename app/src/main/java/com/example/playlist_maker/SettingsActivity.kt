@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.switchmaterial.SwitchMaterial
+
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +31,15 @@ class SettingsActivity : AppCompatActivity() {
         val shareLine = findViewById<TextView>(R.id.sharing)
         val supportLine = findViewById<TextView>(R.id.support)
         val agreementLine = findViewById<TextView>(R.id.agreement)
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.theme_switcher)
+
+        val app = applicationContext as App
+        themeSwitcher.isChecked = app.isDarkTheme()
+
+        themeSwitcher.setOnCheckedChangeListener { _, checked ->
+            app.switchTheme(checked)
+            recreate()
+        }
 
         shareLine.setOnClickListener{
             val urlAndroidDev = getString(R.string.url_android_dev)

@@ -19,4 +19,9 @@
     <string name="mailto">mailto:</string>
     <string name="text_plain">text/plain</string>
     <string name="some_text">Some text</string>
+    <string name="not_found">Ничего не нашлось</string>
+    <string name="no_internet">Проблемы со связью\n\nЗагрузка не удалась.Проверьте подключение к интернету</string>
+    <string name="update">Обновить</string>
+    <string name="you_search">Вы искали</string>
+    <string name="clear_history">Очистить историю</string>
 </resources>
