@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,6 +32,8 @@ class AudioPlayer : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var timer = false
 
+    private lateinit var play: View
+
     private lateinit var trackTime: TextView
 
     companion object {
@@ -37,7 +41,11 @@ class AudioPlayer : AppCompatActivity() {
         private const val STATE_PREPARED = 1
         private const val STATE_PLAYING = 2
         private const val STATE_PAUSED = 3
+        private const val PLAY = 0
+        private const val PAUSE = 1
     }
+
+    private var currentIcon = PLAY
 
     private var playerState = STATE_DEFAULT
 
@@ -70,8 +78,7 @@ class AudioPlayer : AppCompatActivity() {
         val albumNameValue = findViewById<TextView>(R.id.album_name_value)
         trackTime = findViewById(R.id.preview_track_time)
 
-        val play = findViewById<View>(R.id.play)
-        val pause = findViewById<View>(R.id.pause)
+        play = findViewById(R.id.play)
 
         albumNameValue.isVisible = true
         albumName.isVisible = true
@@ -98,16 +105,6 @@ class AudioPlayer : AppCompatActivity() {
         countryValue.text = track.country
 
         play.setOnClickListener {
-            play.isVisible = false
-            pause.isVisible = true
-            timer = true
-            playbackControl()
-        }
-
-        pause.setOnClickListener {
-            play.isVisible = true
-            pause.isVisible = false
-            timer = false
             playbackControl()
         }
     }
@@ -121,17 +118,23 @@ class AudioPlayer : AppCompatActivity() {
         mediaPlayer.setOnCompletionListener {
             playerState = STATE_PREPARED
             trackTime.text ="00:00"
+            currentIcon = PLAY
+            setIcon()
         }
     }
 
     private fun startPlayer() {
         mediaPlayer.start()
         playerState = STATE_PLAYING
+        currentIcon = PAUSE
+        setIcon()
     }
 
     private fun pausePlayer() {
         mediaPlayer.pause()
         playerState = STATE_PAUSED
+        currentIcon = PLAY
+        setIcon()
     }
 
     private fun playbackControl() {
@@ -139,10 +142,31 @@ class AudioPlayer : AppCompatActivity() {
             STATE_PLAYING -> {
                 pausePlayer()
                 stopTimer()
+                timer = true
             }
             STATE_PREPARED, STATE_PAUSED -> {
                 startPlayer()
                 startTimer()
+                timer = false
+            }
+        }
+    }
+
+    private fun setIcon(){
+        when(currentIcon){
+            PLAY ->{
+                if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                    play.setBackgroundResource(R.drawable.play_button_dark)
+                } else {
+                    play.setBackgroundResource(R.drawable.play_button)
+                }
+            }
+            PAUSE ->{
+                if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                    play.setBackgroundResource(R.drawable.pause_button_dark)
+                } else {
+                    play.setBackgroundResource(R.drawable.pause_button)
+                }
             }
         }
     }
@@ -174,5 +198,4 @@ class AudioPlayer : AppCompatActivity() {
     private fun stopTimer() {
         handler.removeCallbacks(updateTimeRunnable)
     }
-
 }

@@ -69,18 +69,6 @@
         />
 
     <View
-        android:visibility="gone"
-        android:id="@+id/pause"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        style="@style/pause_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/artist_name"
-        />
-
-    <View
         android:id="@+id/queue"
         style="@style/queue_btn"
         android:layout_width="51dp"

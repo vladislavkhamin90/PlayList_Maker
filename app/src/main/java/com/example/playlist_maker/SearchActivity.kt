@@ -86,7 +86,7 @@ class SearchActivity : AppCompatActivity() {
         val mainView = findViewById<LinearLayout>(R.id.main)
         val youSearchText = findViewById<TextView>(R.id.you_search)
         val clearHistoryBtn = findViewById<Button>(R.id.clear_history_btn)
-        historyRecyclerView = findViewById<RecyclerView>(R.id.historyRecyclerView)
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
 
         historyPreferences = SearchHistory(this)
         trackListHistory.addAll((historyPreferences.load()))
@@ -122,6 +122,7 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryBtn.setOnClickListener {
             trackListHistory.clear()
             historyRecyclerView.adapter = historyAdapter
+            historyVisibility(false)
         }
 
         fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
