@@ -141,4 +141,8 @@
         <item name="android:background">@drawable/favorite_button_dark</item>
     </style>
 
+    <style name="pause_btn">
+        <item name="android:background">@drawable/pause_button_dark</item>
+    </style>
+
 </resources>

@@ -58,45 +58,59 @@
         app:layout_constraintTop_toBottomOf="@+id/track_name" />
 
     <View
-        android:id="@+id/view"
+        android:id="@+id/play"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="30dp"
         style="@style/play_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/artist_name" />
+        app:layout_constraintTop_toBottomOf="@+id/artist_name"
+        />
+
+    <View
+        android:visibility="gone"
+        android:id="@+id/pause"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="30dp"
+        style="@style/pause_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/artist_name"
+        />
 
     <View
         android:id="@+id/queue"
+        style="@style/queue_btn"
         android:layout_width="51dp"
         android:layout_height="51dp"
         android:layout_marginTop="54dp"
-        style="@style/queue_btn"
-        app:layout_constraintEnd_toStartOf="@+id/view"
-        app:layout_constraintHorizontal_bias="0.504"
+        android:layout_marginEnd="50dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/artist_name" />
 
     <View
         android:id="@+id/favorite"
+        style="@style/favor_btn"
         android:layout_width="51dp"
         android:layout_height="51dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="54dp"
-        style="@style/favor_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/view"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/artist_name" />
 
     <TextView
-        android:id="@+id/preview_track"
+        android:id="@+id/preview_track_time"
+        style="@style/player_text_color"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_16dp"
-        android:text="0:30"
-        style="@style/player_text_color"
         android:gravity="center"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        android:text="00:00"
+        android:layout_marginTop="134dp"
+        app:layout_constraintTop_toBottomOf="@+id/artist_name" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

@@ -2,6 +2,8 @@ package com.example.playlist_maker
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -12,6 +14,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.Nullable
@@ -32,6 +35,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 const val BASE_URL = "https://itunes.apple.com"
+const val CLICK_DEBOUNCE_DELAY = 1000L
+private const val SEARCH_DEBOUNCE_DELAY = 2000L
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var inputEditText: EditText
@@ -51,6 +56,10 @@ class SearchActivity : AppCompatActivity() {
     private val trackList: MutableList<Track> = mutableListOf()
     private val trackListHistory: MutableList<Track> = mutableListOf()
     private val gson = Gson()
+
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
+
 
     var textSearch = ""
 
@@ -99,7 +108,7 @@ class SearchActivity : AppCompatActivity() {
         val searchError = inflater.inflate(R.layout.search_error_item, mainView, false)
         val updateBtn = internetError.findViewById<Button>(R.id.update_btn)
 
-
+        val progressBar = findViewById<ProgressBar>(R.id.progress_bar)
 
         fun historyVisibility(bool: Boolean) {
             youSearchText.isVisible = bool
@@ -143,6 +152,7 @@ class SearchActivity : AppCompatActivity() {
             internetError.isVisible = false
             searchError.isVisible = false
             recyclerView.isVisible = false
+            progressBar.isVisible = false
         }
 
         fun fillTrackList(list: List<SongsResult>) {
@@ -161,27 +171,32 @@ class SearchActivity : AppCompatActivity() {
                         item.collectionName,
                         item.releaseDate,
                         item.primaryGenreName,
-                        item.country
+                        item.country,
+                        item.previewUrl
                     )
                 )
             }
 
             recyclerView.adapter = TrackAdapter(trackList, onItemClicked = { track ->
-                addHistoryUniqueItem(trackListHistory, track)
-                historyPreferences.save(trackListHistory)
-                historyAdapter.notifyDataSetChanged()
-                sendAndGoAudioPlayer(track)
+                if (clickDebounce()) {
+                    addHistoryUniqueItem(trackListHistory, track)
+                    historyPreferences.save(trackListHistory)
+                    historyAdapter.notifyDataSetChanged()
+                    sendAndGoAudioPlayer(track)
+                }
             })
             recyclerView.isVisible = true
         }
 
         fun search() {
             clearAllError()
+            progressBar.isVisible = true
             songs.search(inputEditText.text.toString()).enqueue(object : Callback<Songs> {
                 override fun onResponse(
                     call: Call<Songs>,
                     response: Response<Songs>,
                 ) {
+                    recyclerView.isVisible = false
                     val result = response.body()?.results
                     if (response.isSuccessful) {
                         if (result != null) {
@@ -200,10 +215,10 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<Songs>, t: Throwable) {
+                    recyclerView.isVisible = false
                     internetError()
                     Log.i("MyLog", t.toString())
                 }
-
             })
             if(inputEditText.text.isEmpty()){
                 clearAllError()
@@ -211,16 +226,15 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
-        updateBtn.setOnClickListener {
-            search()
+        val searchRunnable = Runnable { search() }
+
+        fun searchDebounce() {
+            handler.removeCallbacks(searchRunnable)
+            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
         }
 
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                search()
-                true
-            }
-            false
+        updateBtn.setOnClickListener {
+            search()
         }
 
         tittleBackIcon.setNavigationOnClickListener {
@@ -237,6 +251,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchDebounce()
                 textSearch = s.toString()
                 clearButton.isVisible = !s.isNullOrEmpty()
                 historyVisibility((inputEditText.hasFocus() && inputEditText.text.isEmpty()))
@@ -269,4 +284,14 @@ class SearchActivity : AppCompatActivity() {
         textSearch = savedInstanceState.getString(KEY, "")
         inputEditText.setText(textSearch)
     }
+
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
 }
