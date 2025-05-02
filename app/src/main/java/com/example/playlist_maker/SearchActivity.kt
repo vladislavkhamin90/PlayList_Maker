@@ -123,6 +123,7 @@ class SearchActivity : AppCompatActivity() {
             trackListHistory.clear()
             historyRecyclerView.adapter = historyAdapter
             historyVisibility(false)
+            historyPreferences.save(trackListHistory)
         }
 
         fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
@@ -262,6 +263,11 @@ class SearchActivity : AppCompatActivity() {
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
+
+        if(trackListHistory.isEmpty()){
+            historyVisibility(false)
+            clearAllError()
+        }
     }
 
 
