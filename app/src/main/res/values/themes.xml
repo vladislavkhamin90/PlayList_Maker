@@ -140,5 +140,9 @@
         <item name="android:background">@drawable/favorite_button</item>
     </style>
 
+    <style name="pause_btn">
+        <item name="android:background">@drawable/pause_button</item>
+    </style>
+
 
 </resources>
