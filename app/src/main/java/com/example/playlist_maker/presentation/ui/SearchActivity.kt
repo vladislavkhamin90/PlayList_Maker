@@ -1,4 +1,4 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.presentation.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,10 +6,8 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -17,7 +15,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
@@ -25,41 +22,29 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlist_maker.Creator
+import com.example.playlist_maker.R
+import com.example.playlist_maker.data.sharedprefs.SearchHistory
+import com.example.playlist_maker.domain.api.TrackInteractor
+import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.presentation.TrackAdapter
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.text.SimpleDateFormat
-import java.util.Locale
 
-const val BASE_URL = "https://itunes.apple.com"
 const val CLICK_DEBOUNCE_DELAY = 1000L
 private const val SEARCH_DEBOUNCE_DELAY = 2000L
 
 class SearchActivity : AppCompatActivity() {
+    private val interactor = Creator.provideTrackInteractor()
+
     private lateinit var inputEditText: EditText
     private lateinit var historyPreferences: SearchHistory
-
     private lateinit var historyAdapter: TrackAdapter
-
     private lateinit var historyRecyclerView: RecyclerView
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val songs = retrofit.create(SongsApi::class.java)
-
     private val trackList: MutableList<Track> = mutableListOf()
     private val trackListHistory: MutableList<Track> = mutableListOf()
     private val gson = Gson()
-
     private var isClickAllowed = true
     private val handler = Handler(Looper.getMainLooper())
-
 
     var textSearch = ""
 
@@ -87,9 +72,8 @@ class SearchActivity : AppCompatActivity() {
         val youSearchText = findViewById<TextView>(R.id.you_search)
         val clearHistoryBtn = findViewById<Button>(R.id.clear_history_btn)
         historyRecyclerView = findViewById(R.id.historyRecyclerView)
-
         historyPreferences = SearchHistory(this)
-        trackListHistory.addAll((historyPreferences.load()))
+        trackListHistory.addAll(historyPreferences.load())
 
         fun sendAndGoAudioPlayer(track: Track){
             val intent = Intent(this, AudioPlayer::class.java).apply {
@@ -123,10 +107,11 @@ class SearchActivity : AppCompatActivity() {
             trackListHistory.clear()
             historyRecyclerView.adapter = historyAdapter
             historyVisibility(false)
+            historyPreferences.save(trackListHistory)
         }
 
         fun addHistoryUniqueItem(list: MutableList<Track>, track: Track) {
-            list.filter { it.id == track.id }.toMutableList()
+            list.filter { it.trackId == track.trackId }.toMutableList()
             list.add(0, track)
             if (list.size > 10) {
                 list.removeAt(list.lastIndex)
@@ -156,28 +141,10 @@ class SearchActivity : AppCompatActivity() {
             progressBar.isVisible = false
         }
 
-        fun fillTrackList(list: List<SongsResult>) {
-            if (trackList.isNotEmpty()) {
-                trackList.clear()
-            }
-            for (item in list) {
-                trackList.add(
-                    Track(
-                        item.trackName,
-                        item.artistName,
-                        SimpleDateFormat("mm:ss", Locale.getDefault()).format(item.trackTimeMillis)
-                            .toString(),
-                        item.artworkUrl100,
-                        item.id,
-                        item.collectionName,
-                        item.releaseDate,
-                        item.primaryGenreName,
-                        item.country,
-                        item.previewUrl
-                    )
-                )
-            }
 
+        fun fillTrackList(list: List<Track>) {
+            trackList.clear()
+            trackList.addAll(list)
             recyclerView.adapter = TrackAdapter(trackList, onItemClicked = { track ->
                 if (clickDebounce()) {
                     addHistoryUniqueItem(trackListHistory, track)
@@ -192,35 +159,27 @@ class SearchActivity : AppCompatActivity() {
         fun search() {
             clearAllError()
             progressBar.isVisible = true
-            songs.search(inputEditText.text.toString()).enqueue(object : Callback<Songs> {
-                override fun onResponse(
-                    call: Call<Songs>,
-                    response: Response<Songs>,
-                ) {
-                    recyclerView.isVisible = false
-                    val result = response.body()?.results
-                    if (response.isSuccessful) {
-                        if (result != null) {
-                            @Nullable
-                            if (result.isEmpty()) {
-                                searchError()
-                            } else {
-                                fillTrackList(result)
-                            }
-                        } else {
-                            Log.i("MyLog", "TrackList is null")
+            interactor.searchTrack(inputEditText.text.toString(), object: TrackInteractor.TracksConsumer{
+                override fun consume(foundTracks: List<Track>) {
+                    handler.post {
+                        if (foundTracks.isNotEmpty()){
+                            fillTrackList(foundTracks)
+                        }else{
+                            searchError()
                         }
-                    } else {
-                        internetError()
+                        progressBar.isVisible = false
                     }
                 }
 
-                override fun onFailure(call: Call<Songs>, t: Throwable) {
-                    recyclerView.isVisible = false
-                    internetError()
-                    Log.i("MyLog", t.toString())
+                override fun failure() {
+                    handler.post {
+                        trackList.clear()
+                        progressBar.isVisible = false
+                        internetError()
+                    }
                 }
             })
+
             if(inputEditText.text.isEmpty()){
                 clearAllError()
                 historyVisibility(true)
@@ -262,6 +221,11 @@ class SearchActivity : AppCompatActivity() {
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
+
+        if(trackListHistory.isEmpty()){
+            historyVisibility(false)
+            clearAllError()
+        }
     }
 
 

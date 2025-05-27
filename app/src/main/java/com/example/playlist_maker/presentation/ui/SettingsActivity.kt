@@ -1,4 +1,4 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.presentation.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -6,13 +6,21 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.playlist_maker.R
+import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
+import com.example.playlist_maker.domain.models.Theme
+import com.example.playlist_maker.domain.useCase.ThemeUseCase
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 
 class SettingsActivity : AppCompatActivity() {
+    private lateinit var themeUseCase: ThemeUseCase
+    private lateinit var themeSwitcher: SwitchMaterial
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -22,6 +30,10 @@ class SettingsActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val repository = ThemeRepositoryImpl(
+            getSharedPreferences("app_theme", MODE_PRIVATE)
+        )
+        themeUseCase = ThemeUseCase(repository)
 
         val tittleBackIcon = findViewById<Toolbar>(R.id.title)
         tittleBackIcon.setNavigationOnClickListener {
@@ -31,15 +43,7 @@ class SettingsActivity : AppCompatActivity() {
         val shareLine = findViewById<TextView>(R.id.sharing)
         val supportLine = findViewById<TextView>(R.id.support)
         val agreementLine = findViewById<TextView>(R.id.agreement)
-        val themeSwitcher = findViewById<SwitchMaterial>(R.id.theme_switcher)
-
-        val app = applicationContext as App
-        themeSwitcher.isChecked = app.isDarkTheme()
-
-        themeSwitcher.setOnCheckedChangeListener { _, checked ->
-            app.switchTheme(checked)
-            recreate()
-        }
+        themeSwitcher = findViewById(R.id.theme_switcher)
 
         shareLine.setOnClickListener{
             val urlAndroidDev = getString(R.string.url_android_dev)
@@ -74,5 +78,31 @@ class SettingsActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_VIEW, url)
             startActivity(Intent.createChooser(intent,open))
         }
+
+        setupViews()
+        applyCurrentTheme()
+    }
+
+    private fun setupViews() {
+        themeSwitcher.isChecked = themeUseCase.getTheme() == Theme.DARK
+
+        themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
+            val theme = if (isChecked) Theme.DARK else Theme.LIGHT
+            themeUseCase.setTheme(theme)
+            applyTheme(theme)
+        }
+    }
+
+    private fun applyCurrentTheme() {
+        applyTheme(themeUseCase.getTheme())
+    }
+
+    private fun applyTheme(theme: Theme) {
+        AppCompatDelegate.setDefaultNightMode(
+            when (theme) {
+                Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                Theme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+            }
+        )
     }
 }

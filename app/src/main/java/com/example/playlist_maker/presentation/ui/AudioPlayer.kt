@@ -1,11 +1,10 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.presentation.ui
 
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +16,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.example.playlist_maker.R
+import com.example.playlist_maker.data.repository.PlayerRepository
+import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
+import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -27,10 +31,11 @@ class AudioPlayer : AppCompatActivity() {
 
     private val gson = Gson()
 
-    private var mediaPlayer = MediaPlayer()
+    private val dataSource = PlayerRepository()
+    private val playerRepository = PlayerRepositoryImpl(dataSource)
+    private val playerControlUseCase = PlayerControlUseCase(playerRepository)
     private var url = String()
     private val handler = Handler(Looper.getMainLooper())
-    private var timer = false
 
     private lateinit var play: View
 
@@ -65,7 +70,8 @@ class AudioPlayer : AppCompatActivity() {
         }
         val message = intent.getStringExtra(KEY)
         val track = gson.fromJson(message, Track::class.java)
-        fun getCoverArtwork(track: Track) = track.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
+        fun getCoverArtwork(track: Track) =
+            track.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
 
         val trackName = findViewById<TextView>(R.id.track_name)
         val artistName = findViewById<TextView>(R.id.artist_name)
@@ -90,12 +96,12 @@ class AudioPlayer : AppCompatActivity() {
             albumNameValue.text = track.collectionName
         }
 
-        url = track.previewUrl
+        url = track.previewUrl!!
         preparePlayer()
 
         trackName.text = track.trackName
         artistName.text = track.artistName
-        durationValue.text = track.trackTime
+        durationValue.text = track.trackTimeMillis
         Glide.with(applicationContext)
             .load(getCoverArtwork(track)).transform(RoundedCorners(8))
             .placeholder(R.drawable.placeholder_big)
@@ -110,58 +116,61 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun preparePlayer() {
-        mediaPlayer.setDataSource(url)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener {
+        playerControlUseCase.prepare(url)
+        Log.i("PlayerLog", "Prepare")
+        playerState = STATE_PREPARED
+        playerControlUseCase.setOnPreparedListener {
             playerState = STATE_PREPARED
         }
-        mediaPlayer.setOnCompletionListener {
+        playerControlUseCase.setOnCompletionListener{
             playerState = STATE_PREPARED
             trackTime.text ="00:00"
-            currentIcon = PLAY
+            currentIcon = PAUSE
             setIcon()
         }
     }
 
     private fun startPlayer() {
-        mediaPlayer.start()
+        Log.i("PlayerLog", "Start")
+        playerControlUseCase.play()
         playerState = STATE_PLAYING
-        currentIcon = PAUSE
+        currentIcon = PLAY
         setIcon()
     }
 
     private fun pausePlayer() {
-        mediaPlayer.pause()
+        Log.i("PlayerLog", "Pause")
+        playerControlUseCase.pause()
         playerState = STATE_PAUSED
-        currentIcon = PLAY
+        currentIcon = PAUSE
         setIcon()
     }
 
     private fun playbackControl() {
         when(playerState) {
             STATE_PLAYING -> {
+                Log.i("PlayerLog", "pause player")
                 pausePlayer()
                 stopTimer()
-                timer = true
             }
             STATE_PREPARED, STATE_PAUSED -> {
+                Log.i("PlayerLog", "start player")
                 startPlayer()
                 startTimer()
-                timer = false
             }
         }
     }
 
     private fun setIcon(){
         when(currentIcon){
-            PLAY ->{
+            PAUSE ->{
                 if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
                     play.setBackgroundResource(R.drawable.play_button_dark)
                 } else {
                     play.setBackgroundResource(R.drawable.play_button)
                 }
             }
-            PAUSE ->{
+            PLAY ->{
                 if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
                     play.setBackgroundResource(R.drawable.pause_button_dark)
                 } else {
@@ -178,14 +187,14 @@ class AudioPlayer : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.release()
+        playerControlUseCase.release()
     }
 
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
             if (playerState == STATE_PLAYING) {
                 trackTime.text = SimpleDateFormat("mm:ss", Locale.getDefault())
-                    .format(mediaPlayer.currentPosition)
+                    .format(playerControlUseCase.getCurrentPosition())
                 handler.postDelayed(this, 500)
             }
         }
