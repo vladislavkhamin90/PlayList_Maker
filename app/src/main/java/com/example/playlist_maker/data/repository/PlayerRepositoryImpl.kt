@@ -1,20 +1,43 @@
 package com.example.playlist_maker.data.repository
 
-import com.example.playlist_maker.domain.repository.PlayerRepository
+import android.media.MediaPlayer
 
-class PlayerRepositoryImpl(
-    private val dataSource: com.example.playlist_maker.data.repository.PlayerRepository
-) : PlayerRepository {
-    override fun prepare(url: String) = dataSource.prepare(url)
-    override fun play() = dataSource.play()
-    override fun pause() = dataSource.pause()
-    override fun release() = dataSource.release()
-    override fun getCurrentPosition(): Int = dataSource.getCurrentPosition()
-    override fun isPlaying(): Boolean = dataSource.isPlaying()
-    override fun setOnCompletionListener(listener: () -> Unit) {
-        dataSource.setOnCompletionListener(listener)
+class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer) {
+    private var onPreparedListener: (() -> Unit)? = null
+    private var onCompletionListener: (() -> Unit)? = null
+
+    fun prepare(url: String) {
+        mediaPlayer.setDataSource(url)
+        mediaPlayer.prepareAsync()
+        mediaPlayer.setOnPreparedListener { onPreparedListener?.invoke() }
+        mediaPlayer.setOnCompletionListener { onCompletionListener?.invoke() }
     }
-    override fun setOnPreparedListener(listener: () -> Unit) {
-        dataSource.setOnPreparedListener(listener)
+
+    fun play() {
+        mediaPlayer.start()
+    }
+
+    fun pause() {
+        mediaPlayer.pause()
+    }
+
+    fun release() {
+        mediaPlayer.release()
+    }
+
+    fun getCurrentPosition(): Int {
+        return mediaPlayer.currentPosition
+    }
+
+    fun isPlaying(): Boolean {
+        return mediaPlayer.isPlaying
+    }
+
+    fun setOnPreparedListener(listener: () -> Unit) {
+        onPreparedListener = listener
+    }
+
+    fun setOnCompletionListener(listener: () -> Unit) {
+        onCompletionListener = listener
     }
 }

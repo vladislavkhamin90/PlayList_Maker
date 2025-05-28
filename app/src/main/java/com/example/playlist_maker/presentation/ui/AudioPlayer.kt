@@ -16,11 +16,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.example.playlist_maker.Creator
 import com.example.playlist_maker.R
-import com.example.playlist_maker.data.repository.PlayerRepository
-import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
 import com.example.playlist_maker.domain.models.Track
-import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -31,9 +29,7 @@ class AudioPlayer : AppCompatActivity() {
 
     private val gson = Gson()
 
-    private val dataSource = PlayerRepository()
-    private val playerRepository = PlayerRepositoryImpl(dataSource)
-    private val playerControlUseCase = PlayerControlUseCase(playerRepository)
+    val creator = Creator.providePlayerControlUseCase()
     private var url = String()
     private val handler = Handler(Looper.getMainLooper())
 
@@ -116,13 +112,13 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun preparePlayer() {
-        playerControlUseCase.prepare(url)
+        creator.prepare(url)
         Log.i("PlayerLog", "Prepare")
         playerState = STATE_PREPARED
-        playerControlUseCase.setOnPreparedListener {
+        creator.setOnPreparedListener {
             playerState = STATE_PREPARED
         }
-        playerControlUseCase.setOnCompletionListener{
+        creator.setOnCompletionListener{
             playerState = STATE_PREPARED
             trackTime.text ="00:00"
             currentIcon = PAUSE
@@ -132,7 +128,7 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun startPlayer() {
         Log.i("PlayerLog", "Start")
-        playerControlUseCase.play()
+        creator.play()
         playerState = STATE_PLAYING
         currentIcon = PLAY
         setIcon()
@@ -140,7 +136,7 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun pausePlayer() {
         Log.i("PlayerLog", "Pause")
-        playerControlUseCase.pause()
+        creator.pause()
         playerState = STATE_PAUSED
         currentIcon = PAUSE
         setIcon()
@@ -187,14 +183,14 @@ class AudioPlayer : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        playerControlUseCase.release()
+        creator.release()
     }
 
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
             if (playerState == STATE_PLAYING) {
                 trackTime.text = SimpleDateFormat("mm:ss", Locale.getDefault())
-                    .format(playerControlUseCase.getCurrentPosition())
+                    .format(creator.getCurrentPosition())
                 handler.postDelayed(this, 500)
             }
         }

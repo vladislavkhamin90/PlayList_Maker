@@ -10,34 +10,28 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.playlist_maker.Creator
 import com.example.playlist_maker.R
-import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
 import com.example.playlist_maker.domain.models.Theme
-import com.example.playlist_maker.domain.useCase.ThemeUseCase
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var themeUseCase: ThemeUseCase
     private lateinit var themeSwitcher: SwitchMaterial
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val repository = ThemeRepositoryImpl(
-            getSharedPreferences("app_theme", MODE_PRIVATE)
-        )
-        themeUseCase = ThemeUseCase(repository)
 
         val tittleBackIcon = findViewById<Toolbar>(R.id.title)
         tittleBackIcon.setNavigationOnClickListener {
-            this.finish()
+            finish()
         }
 
         val shareLine = findViewById<TextView>(R.id.sharing)
@@ -84,17 +78,17 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        themeSwitcher.isChecked = themeUseCase.getTheme() == Theme.DARK
+        themeSwitcher.isChecked = Creator.provideThemeUseCase(this).getTheme() == Theme.DARK
 
         themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
             val theme = if (isChecked) Theme.DARK else Theme.LIGHT
-            themeUseCase.setTheme(theme)
+            Creator.provideThemeUseCase(this).setTheme(theme)
             applyTheme(theme)
         }
     }
 
     private fun applyCurrentTheme() {
-        applyTheme(themeUseCase.getTheme())
+        applyTheme(Creator.provideThemeUseCase(this).getTheme())
     }
 
     private fun applyTheme(theme: Theme) {

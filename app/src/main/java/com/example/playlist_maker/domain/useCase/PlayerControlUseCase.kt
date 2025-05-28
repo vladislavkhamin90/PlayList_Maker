@@ -1,9 +1,9 @@
 package com.example.playlist_maker.domain.useCase
 
-import com.example.playlist_maker.domain.repository.PlayerRepository
+import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
 
 class PlayerControlUseCase(
-    private val repository: PlayerRepository
+    private val repository: PlayerRepositoryImpl
 ) {
     fun prepare(url: String) = repository.prepare(url)
     fun play() = repository.play()
