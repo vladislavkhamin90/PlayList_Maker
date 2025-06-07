@@ -1,4 +1,4 @@
-package com.example.playlist_maker.presentation.ui
+package com.example.playlist_maker.presentation.ui.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.playlist_maker.R
+import com.example.playlist_maker.presentation.ui.media.MediaActivity
+import com.example.playlist_maker.presentation.ui.search.SearchActivity
+import com.example.playlist_maker.presentation.ui.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

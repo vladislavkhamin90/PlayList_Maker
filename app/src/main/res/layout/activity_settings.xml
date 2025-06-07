@@ -7,7 +7,7 @@
     android:id="@+id/settings"
     android:orientation="vertical">
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/title"
+        android:id="@+id/tool_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_56dp"
         app:title="@string/settings"

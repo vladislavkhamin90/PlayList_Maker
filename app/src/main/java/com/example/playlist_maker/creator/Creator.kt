@@ -1,4 +1,4 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.creator
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -22,6 +22,7 @@ object Creator {
     fun provideTrackInteractor(): TrackInteractor{
         return TracksInteractorImpl(getTrackRepository())
     }
+
     private fun getThemeRepository(context: Context): ThemeRepositoryImpl {
         return ThemeRepositoryImpl(
             context.getSharedPreferences("app_theme", Context.MODE_PRIVATE)
