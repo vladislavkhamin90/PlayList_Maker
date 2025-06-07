@@ -1,13 +1,13 @@
-package com.example.playlist_maker.presentation.ui
+package com.example.playlist_maker.presentation.ui.player
 
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -16,8 +16,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.example.playlist_maker.Creator
 import com.example.playlist_maker.R
+import com.example.playlist_maker.creator.Creator
 import com.example.playlist_maker.domain.models.Track
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
@@ -28,13 +28,13 @@ const val KEY = "KEY"
 class AudioPlayer : AppCompatActivity() {
 
     private val gson = Gson()
-
-    val creator = Creator.providePlayerControlUseCase()
+    private val viewModel: AudioPlayerViewModel by viewModels {
+        AudioPlayerViewModelFactory(Creator.providePlayerControlUseCase())
+    }
     private var url = String()
     private val handler = Handler(Looper.getMainLooper())
 
     private lateinit var play: View
-
     private lateinit var trackTime: TextView
 
     companion object {
@@ -47,7 +47,6 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private var currentIcon = PLAY
-
     private var playerState = STATE_DEFAULT
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +78,6 @@ class AudioPlayer : AppCompatActivity() {
         val albumName = findViewById<TextView>(R.id.album_name)
         val albumNameValue = findViewById<TextView>(R.id.album_name_value)
         trackTime = findViewById(R.id.preview_track_time)
-
         play = findViewById(R.id.play)
 
         albumNameValue.isVisible = true
@@ -93,7 +91,8 @@ class AudioPlayer : AppCompatActivity() {
         }
 
         url = track.previewUrl!!
-        preparePlayer()
+        viewModel.preparePlayer(url)
+        playerState = STATE_PREPARED
 
         trackName.text = track.trackName
         artistName.text = track.artistName
@@ -111,32 +110,15 @@ class AudioPlayer : AppCompatActivity() {
         }
     }
 
-    private fun preparePlayer() {
-        creator.prepare(url)
-        Log.i("PlayerLog", "Prepare")
-        playerState = STATE_PREPARED
-        creator.setOnPreparedListener {
-            playerState = STATE_PREPARED
-        }
-        creator.setOnCompletionListener{
-            playerState = STATE_PREPARED
-            trackTime.text ="00:00"
-            currentIcon = PAUSE
-            setIcon()
-        }
-    }
-
     private fun startPlayer() {
-        Log.i("PlayerLog", "Start")
-        creator.play()
+        viewModel.play()
         playerState = STATE_PLAYING
         currentIcon = PLAY
         setIcon()
     }
 
     private fun pausePlayer() {
-        Log.i("PlayerLog", "Pause")
-        creator.pause()
+        viewModel.pause()
         playerState = STATE_PAUSED
         currentIcon = PAUSE
         setIcon()
@@ -145,12 +127,10 @@ class AudioPlayer : AppCompatActivity() {
     private fun playbackControl() {
         when(playerState) {
             STATE_PLAYING -> {
-                Log.i("PlayerLog", "pause player")
                 pausePlayer()
                 stopTimer()
             }
             STATE_PREPARED, STATE_PAUSED -> {
-                Log.i("PlayerLog", "start player")
                 startPlayer()
                 startTimer()
             }
@@ -183,14 +163,14 @@ class AudioPlayer : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        creator.release()
+        viewModel.release()
     }
 
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
             if (playerState == STATE_PLAYING) {
                 trackTime.text = SimpleDateFormat("mm:ss", Locale.getDefault())
-                    .format(creator.getCurrentPosition())
+                    .format(viewModel.getCurrentPosition())
                 handler.postDelayed(this, 500)
             }
         }

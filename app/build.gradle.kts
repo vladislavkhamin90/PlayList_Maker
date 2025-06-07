@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
+    implementation ("androidx.core:core:1.9.0")
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
