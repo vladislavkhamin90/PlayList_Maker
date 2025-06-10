@@ -15,6 +15,6 @@ class PlayerControlUseCase(
         repository.setOnCompletionListener(listener)
     }
     fun setOnPreparedListener(listener: () -> Unit) {
-        repository.setOnCompletionListener(listener)
+        repository.setOnPreparedListener(listener)
     }
 }

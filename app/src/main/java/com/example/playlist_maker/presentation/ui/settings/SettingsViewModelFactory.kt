@@ -1,3 +1,4 @@
+// SettingsViewModelFactory.kt
 package com.example.playlist_maker.presentation.ui.settings
 
 import android.content.Context
@@ -6,10 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
 import com.example.playlist_maker.domain.useCase.ThemeUseCase
 
-class SettingsViewModelFactory(private val context: Context): ViewModelProvider.Factory {
+class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
 
     private fun provideThemeUseCase(context: Context): ThemeUseCase {
-        return ThemeUseCase(getThemeRepository(context))
+        return ThemeUseCase(getThemeRepository(context), context)
     }
 
     private fun getThemeRepository(context: Context): ThemeRepositoryImpl {

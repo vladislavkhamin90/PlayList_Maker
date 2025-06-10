@@ -1,3 +1,4 @@
+// SettingsActivity.kt
 package com.example.playlist_maker.presentation.ui.settings
 
 import android.content.Intent
@@ -9,13 +10,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.playlist_maker.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var themeSwitcher: SwitchMaterial
-
     private lateinit var vm: SettingsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +29,7 @@ class SettingsActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         vm = ViewModelProvider(this,
             SettingsViewModelFactory(this)
         )[SettingsViewModel::class.java]
@@ -42,38 +44,45 @@ class SettingsActivity : AppCompatActivity() {
         val agreementLine = findViewById<TextView>(R.id.agreement)
         themeSwitcher = findViewById(R.id.theme_switcher)
 
-        shareLine.setOnClickListener{
-            startActivity(Intent.createChooser(vm.getShareIntent(), vm.getShareString()))
+        shareLine.setOnClickListener {
+            vm.onShareClicked()
         }
 
-        supportLine.setOnClickListener{
-            startActivity(Intent.createChooser(vm.getIntentEmail(), vm.getIntentUrl()))
+        supportLine.setOnClickListener {
+            vm.onSupportClicked()
         }
 
-        agreementLine.setOnClickListener{
-            startActivity(Intent.createChooser(vm.getUrlIntent(),vm.getOpenUrlString()))
+        agreementLine.setOnClickListener {
+            vm.onAgreementClicked()
         }
 
+        setupObservers()
         setupViews()
-        applyTheme()
+    }
+
+    private fun setupObservers() {
+        vm.shareEvent.observe(this, Observer { intent ->
+            startActivity(Intent.createChooser(intent, getString(R.string.share_app)))
+        })
+
+        vm.supportEvent.observe(this, Observer { intent ->
+            startActivity(Intent.createChooser(intent, getString(R.string.send)))
+        })
+
+        vm.agreementEvent.observe(this, Observer { intent ->
+            startActivity(Intent.createChooser(intent, getString(R.string.open_url)))
+        })
+
+        vm.themeEvent.observe(this, Observer { themeMode ->
+            AppCompatDelegate.setDefaultNightMode(themeMode)
+        })
     }
 
     private fun setupViews() {
-        themeSwitcher.isChecked = vm.thumbChecked()
+        themeSwitcher.isChecked = vm.isDarkThemeEnabled()
 
         themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
-            val theme = if (isChecked) vm.getDarkTheme() else vm.getLightTheme()
-            vm.setTheme(theme)
-            applyTheme()
+            vm.onThemeSwitched(isChecked)
         }
-    }
-
-    private fun applyTheme() {
-        AppCompatDelegate.setDefaultNightMode(
-            if(vm.thumbChecked()){
-                AppCompatDelegate.MODE_NIGHT_YES
-            } else
-                AppCompatDelegate.MODE_NIGHT_NO
-        )
     }
 }

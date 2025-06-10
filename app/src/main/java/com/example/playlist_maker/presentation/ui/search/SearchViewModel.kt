@@ -14,11 +14,8 @@ class SearchViewModel(
     private val searchHistory: SearchHistory
 ) : ViewModel() {
 
-    private val searchLiveData = MutableLiveData<SearchState>()
-    val searchState: LiveData<SearchState> = searchLiveData
-
-    private val historyLiveData = MutableLiveData<HistoryState>()
-    val historyState: LiveData<HistoryState> = historyLiveData
+    private val _state = MutableLiveData<SearchState>()
+    val state: LiveData<SearchState> = _state
 
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable { search(inputEditText) }
@@ -30,10 +27,10 @@ class SearchViewModel(
 
     private fun loadHistory() {
         val history = searchHistory.load()
-        if (history.isEmpty()) {
-            historyLiveData.value = HistoryState.Empty
+        _state.value = if (history.isEmpty()) {
+            SearchState.HistoryEmpty
         } else {
-            historyLiveData.value = HistoryState.Content(history)
+            SearchState.HistoryContent(history)
         }
     }
 
@@ -45,49 +42,52 @@ class SearchViewModel(
 
     fun search(query: String) {
         if (query.isEmpty()) {
-            searchLiveData.value = SearchState.Empty
+            val history = searchHistory.load()
+            _state.value = if (history.isEmpty()) {
+                SearchState.HistoryEmpty
+            } else {
+                SearchState.HistoryContent(history)
+            }
             return
         }
 
-        searchLiveData.value = SearchState.Loading
+        _state.value = SearchState.Loading
 
         interactor.searchTrack(query, object : TrackInteractor.TracksConsumer {
             override fun consume(foundTracks: List<Track>) {
-                if (foundTracks.isEmpty()) {
-                    searchLiveData.postValue(SearchState.Error(SearchError.NO_RESULTS))
-                } else {
-                    searchLiveData.postValue(SearchState.Content(foundTracks))
-                }
+                _state.postValue(
+                    if (foundTracks.isEmpty()) {
+                        SearchState.Error(SearchError.NO_RESULTS)
+                    } else {
+                        SearchState.Content(foundTracks)
+                    }
+                )
             }
 
             override fun failure() {
-                searchLiveData.postValue(SearchState.Error(SearchError.NETWORK_ERROR))
+                _state.postValue(SearchState.Error(SearchError.NETWORK_ERROR))
             }
         })
     }
 
     fun updateHistory(track: Track) {
-        val currentHistory = (historyLiveData.value as? HistoryState.Content)?.tracks ?: emptyList()
+        val currentHistory = (state.value as? SearchState.HistoryContent)?.tracks ?: emptyList()
         val newHistory = listOf(track) + currentHistory.distinctBy { it.trackId }.take(10)
         searchHistory.save(newHistory)
-        historyLiveData.value = HistoryState.Content(newHistory)
+        _state.value = SearchState.HistoryContent(newHistory)
     }
 
     fun clearHistory() {
         searchHistory.save(emptyList())
-        historyLiveData.value = HistoryState.Empty
+        _state.value = SearchState.HistoryEmpty
     }
 
     sealed class SearchState {
-        data object Empty : SearchState()
+        data object HistoryEmpty : SearchState()
+        data class HistoryContent(val tracks: List<Track>) : SearchState()
         data object Loading : SearchState()
         data class Content(val tracks: List<Track>) : SearchState()
         data class Error(val error: SearchError) : SearchState()
-    }
-
-    sealed class HistoryState {
-        data object Empty : HistoryState()
-        data class Content(val tracks: List<Track>) : HistoryState()
     }
 
     enum class SearchError {

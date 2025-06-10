@@ -111,19 +111,19 @@ class SearchActivity : AppCompatActivity() {
             viewModel.clearHistory()
         }
 
-        viewModel.searchState.observe(this) { state ->
+        viewModel.state.observe(this) { state ->
             when (state) {
-                is SearchViewModel.SearchState.Empty -> clearSearch()
+                is SearchViewModel.SearchState.HistoryEmpty -> {
+                    clearSearch()
+                    clearHistory()
+                }
+                is SearchViewModel.SearchState.HistoryContent -> {
+                    clearSearch()
+                    showHistory(state.tracks)
+                }
                 is SearchViewModel.SearchState.Loading -> showLoading()
                 is SearchViewModel.SearchState.Content -> showTracks(state.tracks)
                 is SearchViewModel.SearchState.Error -> handleError(state.error)
-            }
-        }
-
-        viewModel.historyState.observe(this) { state ->
-            when (state) {
-                is SearchViewModel.HistoryState.Empty -> clearHistory()
-                is SearchViewModel.HistoryState.Content -> showHistory(state.tracks)
             }
         }
         toolBar.setNavigationOnClickListener {

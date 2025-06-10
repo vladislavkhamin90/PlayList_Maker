@@ -2,66 +2,63 @@ package com.example.playlist_maker.presentation.ui.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.playlist_maker.R
 import com.example.playlist_maker.domain.models.Theme
 import com.example.playlist_maker.domain.useCase.ThemeUseCase
 
-class SettingsViewModel(private val themeUseCase: ThemeUseCase): ViewModel() {
+class SettingsViewModel(private val themeUseCase: ThemeUseCase) : ViewModel() {
+    private val _themeEvent = MutableLiveData<Int>()
+    val themeEvent: LiveData<Int> = _themeEvent
 
-    fun thumbChecked():Boolean{
+    val shareEvent = SingleLiveEvent<Intent>()
+    val supportEvent = SingleLiveEvent<Intent>()
+    val agreementEvent = SingleLiveEvent<Intent>()
+
+    fun isDarkThemeEnabled(): Boolean {
         return themeUseCase.getTheme() == Theme.DARK
     }
 
-    fun setTheme(theme: Theme){
+    fun onThemeSwitched(isChecked: Boolean) {
+        val theme = if (isChecked) Theme.DARK else Theme.LIGHT
         themeUseCase.setTheme(theme)
+        _themeEvent.value = if (isChecked) {
+            AppCompatDelegate.MODE_NIGHT_YES
+        } else {
+            AppCompatDelegate.MODE_NIGHT_NO
+        }
     }
 
-    fun getDarkTheme(): Theme {
-        return Theme.DARK
+    fun onShareClicked() {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.url_android_dev))
+        }
+        shareEvent.postValue(intent)
     }
 
-    fun getLightTheme(): Theme {
-        return Theme.LIGHT
+    fun onSupportClicked() {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.mail)))
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.title))
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.text))
+            data = Uri.parse("mailto:")
+        }
+        supportEvent.postValue(intent)
     }
 
-    fun getUrlIntent():Intent{
-        val url = Uri.parse(R.string.offer.toString())
-        return Intent(Intent.ACTION_VIEW, url)
+    fun onAgreementClicked() {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(getString(R.string.offer))
+        }
+        agreementEvent.postValue(intent)
     }
 
-    fun getOpenUrlString():String{
-        return R.string.open_url.toString()
-    }
-
-    fun getIntentUrl():String{
-        return R.string.send.toString()
-    }
-
-    fun getIntentEmail(): Intent{
-        val intent = Intent(Intent.ACTION_SEND)
-        val mail = R.string.mail
-        val mailto = R.string.mailto.toString()
-        val textPlain = R.string.text_plain.toString()
-        val title = R.string.title
-        val text = R.string.text
-        intent.putExtra(Intent.EXTRA_EMAIL, mail)
-        intent.putExtra(Intent.EXTRA_SUBJECT, title)
-        intent.putExtra(Intent.EXTRA_TEXT, text)
-        intent.data = Uri.parse(mailto)
-        intent.type = textPlain
-        return intent
-    }
-
-    fun getShareIntent():Intent{
-        val url = Uri.parse(R.string.url_android_dev.toString())
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "text/plain"
-        intent.putExtra(Intent.EXTRA_TEXT, url)
-        return intent
-    }
-
-    fun getShareString():String{
-        return R.string.share_app.toString()
+    private fun getString(resId: Int): String {
+        return themeUseCase.getContext().getString(resId)
     }
 }

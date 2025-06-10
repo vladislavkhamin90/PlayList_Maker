@@ -1,5 +1,6 @@
 package com.example.playlist_maker.creator
 
+import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatDelegate
@@ -15,26 +16,33 @@ import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import com.example.playlist_maker.domain.useCase.ThemeUseCase
 
 object Creator {
+    private lateinit var appContext: Context
+
+    fun init(application: Application) {
+        appContext = application.applicationContext
+        applyAppTheme()
+    }
+
     private fun getTrackRepository(): TrackRepository {
         return TrackRepositoryImpl(RetrofitNetworkClient())
     }
 
-    fun provideTrackInteractor(): TrackInteractor{
+    fun provideTrackInteractor(): TrackInteractor {
         return TracksInteractorImpl(getTrackRepository())
     }
 
-    private fun getThemeRepository(context: Context): ThemeRepositoryImpl {
+    private fun getThemeRepository(): ThemeRepositoryImpl {
         return ThemeRepositoryImpl(
-            context.getSharedPreferences("app_theme", Context.MODE_PRIVATE)
+            appContext.getSharedPreferences("app_theme", Context.MODE_PRIVATE)
         )
     }
 
-    fun provideThemeUseCase(context: Context): ThemeUseCase {
-        return ThemeUseCase(getThemeRepository(context))
+    fun provideThemeUseCase(): ThemeUseCase {
+        return ThemeUseCase(getThemeRepository(), appContext)
     }
 
-    fun applyAppTheme(context: Context) {
-        val themeUseCase = provideThemeUseCase(context)
+    private fun applyAppTheme() {
+        val themeUseCase = provideThemeUseCase()
         AppCompatDelegate.setDefaultNightMode(
             when (themeUseCase.getTheme()) {
                 Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
@@ -43,7 +51,7 @@ object Creator {
         )
     }
 
-    fun providePlayerControlUseCase(): PlayerControlUseCase{
+    fun providePlayerControlUseCase(): PlayerControlUseCase {
         return PlayerControlUseCase(PlayerRepositoryImpl(MediaPlayer()))
     }
 }
