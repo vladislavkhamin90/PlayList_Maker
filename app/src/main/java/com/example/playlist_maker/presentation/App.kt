@@ -1,11 +1,26 @@
 package com.example.playlist_maker.presentation
 
 import android.app.Application
-import com.example.playlist_maker.creator.Creator
+import com.example.playlist_maker.di.appModule
+import com.example.playlist_maker.di.dataModule
+import com.example.playlist_maker.di.domainModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.logger.AndroidLogger
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.core.logger.Level
 
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        Creator.init(this)
+
+        startKoin {
+            androidContext(this@App)
+            logger(AndroidLogger(Level.DEBUG))
+            modules(
+                dataModule,
+                domainModule,
+                appModule
+            )
+        }
     }
 }

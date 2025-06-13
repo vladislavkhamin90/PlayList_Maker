@@ -11,8 +11,11 @@ import com.example.playlist_maker.R
 import com.example.playlist_maker.presentation.ui.media.MediaActivity
 import com.example.playlist_maker.presentation.ui.search.SearchActivity
 import com.example.playlist_maker.presentation.ui.settings.SettingsActivity
+import com.example.playlist_maker.presentation.ui.settings.SettingsViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
+    private val settingsViewModel: SettingsViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -22,6 +25,9 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        settingsViewModel.initializeTheme()
+
         val searchButton = findViewById<Button>(R.id.search_button)
         val mediaButton = findViewById<Button>(R.id.media_button)
         val settingsButton = findViewById<Button>(R.id.settings_button)

@@ -1,43 +1,69 @@
 package com.example.playlist_maker.data.repository
 
+import android.media.AudioAttributes
 import android.media.MediaPlayer
+import com.example.playlist_maker.domain.repository.PlayerRepository
 
-class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer) {
+class PlayerRepositoryImpl(private var mediaPlayer: MediaPlayer): PlayerRepository {
     private var onPreparedListener: (() -> Unit)? = null
     private var onCompletionListener: (() -> Unit)? = null
 
-    fun prepare(url: String) {
-        mediaPlayer.setDataSource(url)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener { onPreparedListener?.invoke() }
-        mediaPlayer.setOnCompletionListener { onCompletionListener?.invoke() }
+    override fun prepare(url: String) {
+        try {
+            release()
+
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+                setDataSource(url)
+                prepareAsync()
+                setOnPreparedListener {
+                    onPreparedListener?.invoke()
+                }
+                setOnCompletionListener {
+                    onCompletionListener?.invoke()
+                    release() // Auto-release after completion
+                }
+                setOnErrorListener { _, _, _ ->
+                    release()
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            release()
+            throw IllegalStateException("Error preparing MediaPlayer: ${e.message}")
+        }
     }
 
-    fun play() {
+    override fun play() {
         mediaPlayer.start()
     }
 
-    fun pause() {
+    override fun pause() {
         mediaPlayer.pause()
     }
 
-    fun release() {
+    override fun release() {
         mediaPlayer.release()
     }
 
-    fun getCurrentPosition(): Int {
+    override fun getCurrentPosition(): Int {
         return mediaPlayer.currentPosition
     }
 
-    fun isPlaying(): Boolean {
+    override fun isPlaying(): Boolean {
         return mediaPlayer.isPlaying
     }
 
-    fun setOnPreparedListener(listener: () -> Unit) {
+    override fun setOnPreparedListener(listener: () -> Unit) {
         onPreparedListener = listener
     }
 
-    fun setOnCompletionListener(listener: () -> Unit) {
+    override fun setOnCompletionListener(listener: () -> Unit) {
         onCompletionListener = listener
     }
 }

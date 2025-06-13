@@ -13,7 +13,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
@@ -22,7 +21,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
-import com.example.playlist_maker.creator.Creator
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
 import com.example.playlist_maker.presentation.ui.player.AudioPlayer
@@ -46,10 +45,9 @@ class SearchActivity : AppCompatActivity() {
 
     private val gson = Gson()
     private var isClickAllowed = true
+    private var currentQuery: String = ""
 
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(Creator.provideTrackInteractor(), applicationContext)
-    }
+    private val viewModel: SearchViewModel by viewModel()
 
     companion object {
         const val KEY = "KEY"
@@ -90,21 +88,24 @@ class SearchActivity : AppCompatActivity() {
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
+            currentQuery = ""
+            viewModel.search("")
         }
 
         inputEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                currentQuery = s?.toString() ?: ""
                 clearButton.isVisible = !s.isNullOrEmpty()
-                viewModel.searchDebounced(s.toString())
+                viewModel.searchDebounced(currentQuery)
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
 
         internetErrorView.findViewById<Button>(R.id.update_btn).setOnClickListener {
-            viewModel.search(inputEditText.text.toString())
+            viewModel.search(currentQuery)
         }
 
         clearHistoryBtn.setOnClickListener {
@@ -114,12 +115,16 @@ class SearchActivity : AppCompatActivity() {
         viewModel.state.observe(this) { state ->
             when (state) {
                 is SearchViewModel.SearchState.HistoryEmpty -> {
-                    clearSearch()
-                    clearHistory()
+                    if (currentQuery.isEmpty()) {
+                        clearSearch()
+                        clearHistory()
+                    }
                 }
                 is SearchViewModel.SearchState.HistoryContent -> {
-                    clearSearch()
-                    showHistory(state.tracks)
+                    if (currentQuery.isEmpty()) {
+                        clearSearch()
+                        showHistory(state.tracks)
+                    }
                 }
                 is SearchViewModel.SearchState.Loading -> showLoading()
                 is SearchViewModel.SearchState.Content -> showTracks(state.tracks)
@@ -136,6 +141,9 @@ class SearchActivity : AppCompatActivity() {
         recyclerView.isVisible = false
         internetErrorView.isVisible = false
         searchErrorView.isVisible = false
+        historyRecyclerView.isVisible = false
+        youSearchText.isVisible = false
+        clearHistoryBtn.isVisible = false
     }
 
     private fun showTracks(tracks: List<Track>) {
@@ -143,6 +151,9 @@ class SearchActivity : AppCompatActivity() {
         recyclerView.isVisible = true
         internetErrorView.isVisible = false
         searchErrorView.isVisible = false
+        historyRecyclerView.isVisible = false
+        youSearchText.isVisible = false
+        clearHistoryBtn.isVisible = false
 
         recyclerView.adapter = TrackAdapter(tracks) { track ->
             if (clickDebounce()) {

@@ -1,11 +1,11 @@
 package com.example.playlist_maker.presentation.ui.player
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -16,18 +16,16 @@ import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlist_maker.R
-import com.example.playlist_maker.creator.Creator
 import com.example.playlist_maker.domain.models.Track
 import com.google.gson.Gson
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 const val KEY = "KEY"
 
 class AudioPlayer : AppCompatActivity() {
 
     private val gson = Gson()
-    private val viewModel: AudioPlayerViewModel by viewModels {
-        AudioPlayerViewModelFactory(Creator.providePlayerControlUseCase())
-    }
+    private val viewModel: AudioPlayerViewModel by viewModel()
 
     private lateinit var play: View
     private lateinit var trackTime: TextView
@@ -51,9 +49,17 @@ class AudioPlayer : AppCompatActivity() {
         val track = gson.fromJson(message, Track::class.java)
         initViews(track)
         setupObservers()
-        viewModel.preparePlayer(track.previewUrl!!)
+        track.previewUrl?.let { url ->
+            if (url.isNotBlank()) {
+                viewModel.preparePlayer(url)
+            } else {
+                Log.i("MyLog","No audio available")
+            }
+        } ?:  Log.i("MyLog","No audio URL provided")
         play.setOnClickListener {
-            viewModel.playbackControl()
+            if (viewModel.playerState.value?.status != AudioPlayerViewModel.PlayerState.Status.DEFAULT) {
+                viewModel.playbackControl()
+            }
         }
     }
 
@@ -98,26 +104,25 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.currentPosition.observe(this, Observer { position ->
-            position?.let { trackTime.text = it }
-        })
-
         viewModel.playerState.observe(this, Observer { state ->
-            updatePlayButtonIcon(state)
+            state?.let {
+                updatePlayButtonIcon(it.status)
+                trackTime.text = it.currentPosition
+            }
         })
     }
 
-    private fun updatePlayButtonIcon(state: AudioPlayerViewModel.PlayerState) {
+    private fun updatePlayButtonIcon(status: AudioPlayerViewModel.PlayerState.Status) {
         val isDarkTheme = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
-        when (state) {
-            is AudioPlayerViewModel.PlayerState.Playing -> {
+        when (status) {
+            AudioPlayerViewModel.PlayerState.Status.PLAYING -> {
                 play.setBackgroundResource(
                     if (isDarkTheme) R.drawable.pause_button_dark else R.drawable.pause_button
                 )
             }
-            is AudioPlayerViewModel.PlayerState.Prepared,
-            is AudioPlayerViewModel.PlayerState.Paused -> {
+            AudioPlayerViewModel.PlayerState.Status.PREPARED,
+            AudioPlayerViewModel.PlayerState.Status.PAUSED -> {
                 play.setBackgroundResource(
                     if (isDarkTheme) R.drawable.play_button_dark else R.drawable.play_button
                 )

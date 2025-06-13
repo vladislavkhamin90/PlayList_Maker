@@ -4,19 +4,14 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.playlist_maker.R
 import com.example.playlist_maker.domain.models.Theme
 import com.example.playlist_maker.domain.useCase.ThemeUseCase
 
 class SettingsViewModel(private val themeUseCase: ThemeUseCase) : ViewModel() {
-    private val _themeEvent = MutableLiveData<Int>()
-    val themeEvent: LiveData<Int> = _themeEvent
-
-    val shareEvent = SingleLiveEvent<Intent>()
-    val supportEvent = SingleLiveEvent<Intent>()
-    val agreementEvent = SingleLiveEvent<Intent>()
+    private val _actionEvent = SingleLiveEvent<Intent>()
+    val actionEvent: LiveData<Intent> = _actionEvent
 
     fun isDarkThemeEnabled(): Boolean {
         return themeUseCase.getTheme() == Theme.DARK
@@ -25,11 +20,7 @@ class SettingsViewModel(private val themeUseCase: ThemeUseCase) : ViewModel() {
     fun onThemeSwitched(isChecked: Boolean) {
         val theme = if (isChecked) Theme.DARK else Theme.LIGHT
         themeUseCase.setTheme(theme)
-        _themeEvent.value = if (isChecked) {
-            AppCompatDelegate.MODE_NIGHT_YES
-        } else {
-            AppCompatDelegate.MODE_NIGHT_NO
-        }
+        applyTheme(theme)
     }
 
     fun onShareClicked() {
@@ -37,7 +28,7 @@ class SettingsViewModel(private val themeUseCase: ThemeUseCase) : ViewModel() {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, getString(R.string.url_android_dev))
         }
-        shareEvent.postValue(intent)
+        _actionEvent.postValue(intent)
     }
 
     fun onSupportClicked() {
@@ -48,17 +39,29 @@ class SettingsViewModel(private val themeUseCase: ThemeUseCase) : ViewModel() {
             putExtra(Intent.EXTRA_TEXT, getString(R.string.text))
             data = Uri.parse("mailto:")
         }
-        supportEvent.postValue(intent)
+        _actionEvent.postValue(intent)
     }
 
     fun onAgreementClicked() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(getString(R.string.offer))
         }
-        agreementEvent.postValue(intent)
+        _actionEvent.postValue(intent)
     }
 
     private fun getString(resId: Int): String {
         return themeUseCase.getContext().getString(resId)
+    }
+
+    private fun applyTheme(theme: Theme) {
+        val mode = when (theme) {
+            Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+            Theme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
+    }
+
+    fun initializeTheme() {
+        applyTheme(themeUseCase.getTheme())
     }
 }

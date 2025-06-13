@@ -1,9 +1,10 @@
 package com.example.playlist_maker.domain.useCase
 
-import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
+import android.util.Log
+import com.example.playlist_maker.domain.repository.PlayerRepository
 
 class PlayerControlUseCase(
-    private val repository: PlayerRepositoryImpl
+    private val repository: PlayerRepository
 ) {
     fun prepare(url: String) = repository.prepare(url)
     fun play() = repository.play()
@@ -15,6 +16,7 @@ class PlayerControlUseCase(
         repository.setOnCompletionListener(listener)
     }
     fun setOnPreparedListener(listener: () -> Unit) {
+        Log.i("MyLog", "PREPARiiiiing!")
         repository.setOnPreparedListener(listener)
     }
 }

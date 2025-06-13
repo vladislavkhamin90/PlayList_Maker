@@ -1,4 +1,3 @@
-// SettingsActivity.kt
 package com.example.playlist_maker.presentation.ui.settings
 
 import android.content.Intent
@@ -6,18 +5,17 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.playlist_maker.R
 import com.google.android.material.switchmaterial.SwitchMaterial
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var themeSwitcher: SwitchMaterial
-    private lateinit var vm: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,10 +28,6 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
 
-        vm = ViewModelProvider(this,
-            SettingsViewModelFactory(this)
-        )[SettingsViewModel::class.java]
-
         val tittleBackIcon = findViewById<Toolbar>(R.id.tool_bar)
         tittleBackIcon.setNavigationOnClickListener {
             finish()
@@ -44,16 +38,22 @@ class SettingsActivity : AppCompatActivity() {
         val agreementLine = findViewById<TextView>(R.id.agreement)
         themeSwitcher = findViewById(R.id.theme_switcher)
 
+        themeSwitcher.isChecked = viewModel.isDarkThemeEnabled()
+
+        themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onThemeSwitched(isChecked)
+        }
+
         shareLine.setOnClickListener {
-            vm.onShareClicked()
+            viewModel.onShareClicked()
         }
 
         supportLine.setOnClickListener {
-            vm.onSupportClicked()
+            viewModel.onSupportClicked()
         }
 
         agreementLine.setOnClickListener {
-            vm.onAgreementClicked()
+            viewModel.onAgreementClicked()
         }
 
         setupObservers()
@@ -61,28 +61,27 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        vm.shareEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.share_app)))
-        })
-
-        vm.supportEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.send)))
-        })
-
-        vm.agreementEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.open_url)))
-        })
-
-        vm.themeEvent.observe(this, Observer { themeMode ->
-            AppCompatDelegate.setDefaultNightMode(themeMode)
+        viewModel.actionEvent.observe(this, Observer { intent ->
+            when (intent.action) {
+                Intent.ACTION_SEND -> {
+                    if (intent.type == "text/plain" && intent.data?.scheme == "mailto") {
+                        startActivity(Intent.createChooser(intent, getString(R.string.send)))
+                    } else {
+                        startActivity(Intent.createChooser(intent, getString(R.string.share_app)))
+                    }
+                }
+                Intent.ACTION_VIEW -> {
+                    startActivity(Intent.createChooser(intent, getString(R.string.open_url)))
+                }
+            }
         })
     }
 
     private fun setupViews() {
-        themeSwitcher.isChecked = vm.isDarkThemeEnabled()
+        themeSwitcher.isChecked = viewModel.isDarkThemeEnabled()
 
         themeSwitcher.setOnCheckedChangeListener { _, isChecked ->
-            vm.onThemeSwitched(isChecked)
+            viewModel.onThemeSwitched(isChecked)
         }
     }
 }

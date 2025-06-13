@@ -9,58 +9,62 @@ import java.util.Locale
 
 class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCase) : ViewModel() {
 
-    sealed class PlayerState {
-        object Default : PlayerState()
-        object Prepared : PlayerState()
-        object Playing : PlayerState()
-        object Paused : PlayerState()
+    data class PlayerState(
+        val status: Status,
+        val currentPosition: String = "00:00"
+    ) {
+        enum class Status {
+            DEFAULT, PREPARED, PLAYING, PAUSED
+        }
     }
 
-    private val _playerState = MutableLiveData<PlayerState>(PlayerState.Default)
+    private val _playerState = MutableLiveData(PlayerState(PlayerState.Status.DEFAULT))
     val playerState: LiveData<PlayerState> = _playerState
-
-    private val _currentPosition = MutableLiveData<String>()
-    val currentPosition: LiveData<String> = _currentPosition
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
-            if (_playerState.value == PlayerState.Playing) {
+            if (_playerState.value?.status == PlayerState.Status.PLAYING) {
                 updateCurrentPosition()
                 handler.postDelayed(this, 500)
             }
         }
     }
 
+    private var currentUrl: String? = null
+
     fun preparePlayer(url: String) {
-        playerControlUseCase.prepare(url)
-        playerControlUseCase.setOnPreparedListener {
-            _playerState.postValue(PlayerState.Prepared)
+        if (currentUrl == url && playerState.value?.status == PlayerState.Status.PREPARED) {
+            return
         }
-        playerControlUseCase.setOnCompletionListener {
-            _playerState.postValue(PlayerState.Paused)
-            handler.removeCallbacks(updateTimeRunnable)
-            _currentPosition.postValue(
-                SimpleDateFormat("mm:ss", Locale.getDefault()).format(0)
-            )
+
+        currentUrl = url
+        _playerState.value = PlayerState(PlayerState.Status.DEFAULT)
+
+        try {
+            playerControlUseCase.prepare(url)
+            playerControlUseCase.setOnPreparedListener {
+                _playerState.postValue(PlayerState(PlayerState.Status.PREPARED))
+            }
+            playerControlUseCase.setOnCompletionListener {
+                _playerState.postValue(PlayerState(PlayerState.Status.PAUSED, "00:00"))
+                handler.removeCallbacks(updateTimeRunnable)
+            }
+        } catch (e: Exception) {
+            _playerState.postValue(PlayerState(PlayerState.Status.DEFAULT))
         }
     }
 
     fun play() {
         playerControlUseCase.play()
-        _playerState.value = PlayerState.Playing
+        _playerState.value = PlayerState(PlayerState.Status.PLAYING)
         startTimer()
     }
 
     fun pause() {
         playerControlUseCase.pause()
-        _playerState.value = PlayerState.Paused
+        _playerState.value = PlayerState(PlayerState.Status.PAUSED)
         stopTimer()
-        if (playerControlUseCase.getCurrentPosition() >= playerControlUseCase.getCurrentPosition()) {
-            _currentPosition.postValue(
-                SimpleDateFormat("mm:ss", Locale.getDefault()).format(0)
-            )
-        }
     }
 
     fun release() {
@@ -69,17 +73,19 @@ class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCas
     }
 
     fun playbackControl() {
-        when (_playerState.value) {
-            PlayerState.Playing -> pause()
-            PlayerState.Prepared, PlayerState.Paused -> play()
+        when (_playerState.value?.status) {
+            PlayerState.Status.PLAYING -> pause()
+            PlayerState.Status.PREPARED, PlayerState.Status.PAUSED -> play()
             else -> {}
         }
     }
 
     private fun updateCurrentPosition() {
         val position = playerControlUseCase.getCurrentPosition()
-        _currentPosition.postValue(
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(position)
+        _playerState.postValue(
+            _playerState.value?.copy(
+                currentPosition = SimpleDateFormat("mm:ss", Locale.getDefault()).format(position)
+            )
         )
     }
 
