@@ -98,26 +98,25 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.currentPosition.observe(this, Observer { position ->
-            position?.let { trackTime.text = it }
-        })
-
         viewModel.playerState.observe(this, Observer { state ->
-            updatePlayButtonIcon(state)
+            state?.let {
+                updatePlayButtonIcon(it.status)
+                trackTime.text = it.currentPosition
+            }
         })
     }
 
-    private fun updatePlayButtonIcon(state: AudioPlayerViewModel.PlayerState) {
+    private fun updatePlayButtonIcon(status: AudioPlayerViewModel.PlayerState.Status) {
         val isDarkTheme = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
-        when (state) {
-            is AudioPlayerViewModel.PlayerState.Playing -> {
+        when (status) {
+            AudioPlayerViewModel.PlayerState.Status.PLAYING -> {
                 play.setBackgroundResource(
                     if (isDarkTheme) R.drawable.pause_button_dark else R.drawable.pause_button
                 )
             }
-            is AudioPlayerViewModel.PlayerState.Prepared,
-            is AudioPlayerViewModel.PlayerState.Paused -> {
+            AudioPlayerViewModel.PlayerState.Status.PREPARED,
+            AudioPlayerViewModel.PlayerState.Status.PAUSED -> {
                 play.setBackgroundResource(
                     if (isDarkTheme) R.drawable.play_button_dark else R.drawable.play_button
                 )

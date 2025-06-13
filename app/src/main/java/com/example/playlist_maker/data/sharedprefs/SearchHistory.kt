@@ -23,8 +23,12 @@ class SearchHistory(context: Context) {
     fun load(): List<Track> {
         val jsonString = sharedPref.getString(TRACK_HISTORY_KEY, null)
         return if (jsonString != null) {
-            val type = object : TypeToken<List<Track>>() {}.type
-            gson.fromJson(jsonString, type) ?: emptyList()
+            try {
+                val type = object : TypeToken<List<Track>>() {}.type
+                gson.fromJson<List<Track>>(jsonString, type) ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
         } else {
             emptyList()
         }

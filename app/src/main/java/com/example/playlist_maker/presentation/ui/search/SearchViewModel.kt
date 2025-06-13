@@ -41,6 +41,7 @@ class SearchViewModel(
     }
 
     fun search(query: String) {
+        inputEditText = query
         if (query.isEmpty()) {
             val history = searchHistory.load()
             _state.value = if (history.isEmpty()) {
@@ -71,15 +72,19 @@ class SearchViewModel(
     }
 
     fun updateHistory(track: Track) {
-        val currentHistory = (state.value as? SearchState.HistoryContent)?.tracks ?: emptyList()
-        val newHistory = listOf(track) + currentHistory.distinctBy { it.trackId }.take(10)
+        val currentHistory = searchHistory.load()
+        val newHistory = listOf(track) + currentHistory.filter { it.trackId != track.trackId }.take(9)
         searchHistory.save(newHistory)
-        _state.value = SearchState.HistoryContent(newHistory)
+        if (inputEditText.isEmpty()) {
+            _state.value = SearchState.HistoryContent(newHistory)
+        }
     }
 
     fun clearHistory() {
         searchHistory.save(emptyList())
-        _state.value = SearchState.HistoryEmpty
+        if (inputEditText.isEmpty()) {
+            _state.value = SearchState.HistoryEmpty
+        }
     }
 
     sealed class SearchState {
