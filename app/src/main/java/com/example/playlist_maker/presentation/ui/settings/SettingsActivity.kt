@@ -1,4 +1,3 @@
-// SettingsActivity.kt
 package com.example.playlist_maker.presentation.ui.settings
 
 import android.content.Intent
@@ -61,16 +60,19 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        vm.shareEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.share_app)))
-        })
-
-        vm.supportEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.send)))
-        })
-
-        vm.agreementEvent.observe(this, Observer { intent ->
-            startActivity(Intent.createChooser(intent, getString(R.string.open_url)))
+        vm.actionEvent.observe(this, Observer { intent ->
+            when (intent.action) {
+                Intent.ACTION_SEND -> {
+                    if (intent.type == "text/plain" && intent.data?.scheme == "mailto") {
+                        startActivity(Intent.createChooser(intent, getString(R.string.send)))
+                    } else {
+                        startActivity(Intent.createChooser(intent, getString(R.string.share_app)))
+                    }
+                }
+                Intent.ACTION_VIEW -> {
+                    startActivity(Intent.createChooser(intent, getString(R.string.open_url)))
+                }
+            }
         })
 
         vm.themeEvent.observe(this, Observer { themeMode ->
