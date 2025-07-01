@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -33,6 +34,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
 }
 
 dependencies {
@@ -45,6 +51,7 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation (libs.androidx.core.ktx.v1160)
     implementation (libs.koin.android)
+    implementation (libs.material.v180)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
