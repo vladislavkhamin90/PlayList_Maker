@@ -13,6 +13,10 @@ class FavoriteTracksFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: FavoriteTracksViewModel by viewModel()
 
+    companion object {
+        fun newInstance() = FavoriteTracksFragment()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
