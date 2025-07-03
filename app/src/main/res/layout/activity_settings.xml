@@ -12,7 +12,7 @@
         android:layout_height="@dimen/_56dp"
         app:title="@string/settings"
         app:titleTextAppearance="@style/title_attrs_settings"
-        style="@style/title_settings"
+        style="@style/title_22"
         android:layout_marginBottom="@dimen/_24dp" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
