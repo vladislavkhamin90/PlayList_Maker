@@ -39,17 +39,12 @@ class MediaActivity : AppCompatActivity() {
     }
 
     private fun setupViewPager() {
-        val fragments = listOf(
-            FavoriteTracksFragment(),
-            PlaylistFragment()
-        )
-
-        val adapter = MediaPagerAdapter(this, fragments)
+        val adapter = MediaPagerAdapter(this)
         binding.viewPager.adapter = adapter
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> getString(R.string.tracks)
+                0 -> getString(R.string.featured_tracks)
                 1 -> getString(R.string.playlists)
                 else -> ""
             }
