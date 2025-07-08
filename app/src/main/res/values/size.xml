@@ -8,5 +8,5 @@
     <dimen name="_12dp">12dp</dimen>
     <dimen name="_16sp">16sp</dimen>
     <dimen name="_26sp">26sp</dimen>
-
+    <dimen name="image_corner_radius">8dp</dimen>
 </resources>

@@ -37,7 +37,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private lateinit var internetErrorView: View
     private lateinit var searchErrorView: View
     private lateinit var recyclerView: RecyclerView
-//    private lateinit var toolBar: Toolbar
 
     private val gson = Gson()
     private var isClickAllowed = true
@@ -56,7 +55,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         clearHistoryBtn = view.findViewById(R.id.clear_history_btn)
         historyRecyclerView = view.findViewById(R.id.historyRecyclerView)
         progressBar = view.findViewById(R.id.progress_bar)
-//        toolBar = view.findViewById(R.id.tool_bar)
 
         val inflater = LayoutInflater.from(requireContext())
         internetErrorView = inflater.inflate(R.layout.internet_error_item, mainView, false)
@@ -116,9 +114,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 is SearchViewModel.SearchState.Error -> handleError(state.error)
             }
         }
-//        toolBar.setNavigationOnClickListener {
-//            requireActivity().onBackPressedDispatcher.onBackPressed()
-//        }
     }
 
     private fun showLoading() {
