@@ -21,9 +21,12 @@ import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
 import com.example.playlist_maker.presentation.ui.player.KEY
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-
-const val CLICK_DEBOUNCE_DELAY = 1000L
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
@@ -39,14 +42,27 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private lateinit var recyclerView: RecyclerView
 
     private val gson = Gson()
-    private var isClickAllowed = true
+    private var clickDebounceJob: Job? = null
+    private var searchDebounceJob: Job? = null
     private var currentQuery: String = ""
 
     private val viewModel: SearchViewModel by viewModel()
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initViews(view)
+        setupErrorViews()
+        setupRecyclerViews()
+        setupClearButton()
+        setupTextWatcher()
+        setupErrorButton()
+        setupClearHistoryButton()
+        observeViewModel()
+    }
+
+    private fun initViews(view: View) {
         recyclerView = view.findViewById(R.id.recycle_view)
         inputEditText = view.findViewById(R.id.inputEditText)
         clearButton = view.findViewById(R.id.clearIcon)
@@ -55,7 +71,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         clearHistoryBtn = view.findViewById(R.id.clear_history_btn)
         historyRecyclerView = view.findViewById(R.id.historyRecyclerView)
         progressBar = view.findViewById(R.id.progress_bar)
+    }
 
+    private fun setupErrorViews() {
         val inflater = LayoutInflater.from(requireContext())
         internetErrorView = inflater.inflate(R.layout.internet_error_item, mainView, false)
         searchErrorView = inflater.inflate(R.layout.search_error_item, mainView, false)
@@ -65,36 +83,52 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         internetErrorView.isVisible = false
         searchErrorView.isVisible = false
+    }
 
+    private fun setupRecyclerViews() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+    }
 
+    private fun setupClearButton() {
         clearButton.setOnClickListener {
             inputEditText.setText("")
             currentQuery = ""
             viewModel.search("")
         }
+    }
 
+    private fun setupTextWatcher() {
         inputEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 currentQuery = s?.toString() ?: ""
                 clearButton.isVisible = !s.isNullOrEmpty()
-                viewModel.searchDebounced(currentQuery)
+                searchDebounceJob?.cancel()
+                searchDebounceJob = coroutineScope.launch {
+                    delay(SEARCH_DEBOUNCE_DELAY)
+                    viewModel.searchDebounced(currentQuery)
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
 
+    private fun setupErrorButton() {
         internetErrorView.findViewById<Button>(R.id.update_btn).setOnClickListener {
             viewModel.search(currentQuery)
         }
+    }
 
+    private fun setupClearHistoryButton() {
         clearHistoryBtn.setOnClickListener {
             viewModel.clearHistory()
         }
+    }
 
+    private fun observeViewModel() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SearchViewModel.SearchState.HistoryEmpty -> {
@@ -136,7 +170,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         clearHistoryBtn.isVisible = false
 
         recyclerView.adapter = TrackAdapter(tracks) { track ->
-            if (clickDebounce()) {
+            clickDebounceJob?.cancel()
+            clickDebounceJob = coroutineScope.launch {
                 viewModel.updateHistory(track)
                 navigateToPlayer(track)
             }
@@ -172,7 +207,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         historyRecyclerView.isVisible = true
 
         historyRecyclerView.adapter = TrackAdapter(tracks) { track ->
-            if (clickDebounce()) {
+            clickDebounceJob?.cancel()
+            clickDebounceJob = coroutineScope.launch {
                 navigateToPlayer(track)
             }
         }
@@ -194,12 +230,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         )
     }
 
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            inputEditText.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-        }
-        return current
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchDebounceJob?.cancel()
+        clickDebounceJob?.cancel()
+    }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 }

@@ -4,7 +4,8 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import com.example.playlist_maker.domain.repository.PlayerRepository
 
-class PlayerRepositoryImpl(private var mediaPlayer: MediaPlayer): PlayerRepository {
+class PlayerRepositoryImpl : PlayerRepository {
+    private var mediaPlayer: MediaPlayer? = null
     private var onPreparedListener: (() -> Unit)? = null
     private var onCompletionListener: (() -> Unit)? = null
 
@@ -26,7 +27,7 @@ class PlayerRepositoryImpl(private var mediaPlayer: MediaPlayer): PlayerReposito
                 }
                 setOnCompletionListener {
                     onCompletionListener?.invoke()
-                    release() // Auto-release after completion
+                    release()
                 }
                 setOnErrorListener { _, _, _ ->
                     release()
@@ -40,23 +41,24 @@ class PlayerRepositoryImpl(private var mediaPlayer: MediaPlayer): PlayerReposito
     }
 
     override fun play() {
-        mediaPlayer.start()
+        mediaPlayer?.start()
     }
 
     override fun pause() {
-        mediaPlayer.pause()
+        mediaPlayer?.pause()
     }
 
     override fun release() {
-        mediaPlayer.release()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     override fun getCurrentPosition(): Int {
-        return mediaPlayer.currentPosition
+        return mediaPlayer?.currentPosition ?: 0
     }
 
     override fun isPlaying(): Boolean {
-        return mediaPlayer.isPlaying
+        return mediaPlayer?.isPlaying ?: false
     }
 
     override fun setOnPreparedListener(listener: () -> Unit) {
