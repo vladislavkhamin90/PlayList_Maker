@@ -28,7 +28,7 @@ val dataModule = module {
             .create(SongsApi::class.java)
     }
 
-    single<NetworkClient> { RetrofitNetworkClient() }
+    single<NetworkClient> { RetrofitNetworkClient(get()) }
 
     single<SharedPreferences> {
         androidContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -38,7 +38,7 @@ val dataModule = module {
 
     single<ThemeRepository> { ThemeRepositoryImpl(get()) }
 
-    single<PlayerRepository> { PlayerRepositoryImpl(get()) }
+    single<PlayerRepository> { PlayerRepositoryImpl() }
 
     single { MediaPlayer() }
 

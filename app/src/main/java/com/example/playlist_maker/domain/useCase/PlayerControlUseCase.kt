@@ -1,6 +1,5 @@
 package com.example.playlist_maker.domain.useCase
 
-import android.util.Log
 import com.example.playlist_maker.domain.repository.PlayerRepository
 
 class PlayerControlUseCase(
@@ -16,7 +15,6 @@ class PlayerControlUseCase(
         repository.setOnCompletionListener(listener)
     }
     fun setOnPreparedListener(listener: () -> Unit) {
-        Log.i("MyLog", "PREPARiiiiing!")
         repository.setOnPreparedListener(listener)
     }
 }

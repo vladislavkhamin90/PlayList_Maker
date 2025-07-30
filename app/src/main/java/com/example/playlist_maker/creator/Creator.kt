@@ -2,16 +2,10 @@ package com.example.playlist_maker.creator
 
 import android.app.Application
 import android.content.Context
-import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatDelegate
-import com.example.playlist_maker.data.network.RetrofitNetworkClient
 import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
 import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
-import com.example.playlist_maker.data.repository.TrackRepositoryImpl
-import com.example.playlist_maker.domain.api.TrackInteractor
-import com.example.playlist_maker.domain.impl.TracksInteractorImpl
 import com.example.playlist_maker.domain.models.Theme
-import com.example.playlist_maker.domain.repository.TrackRepository
 import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import com.example.playlist_maker.domain.useCase.ThemeUseCase
 
@@ -21,14 +15,6 @@ object Creator {
     fun init(application: Application) {
         appContext = application.applicationContext
         applyAppTheme()
-    }
-
-    private fun getTrackRepository(): TrackRepository {
-        return TrackRepositoryImpl(RetrofitNetworkClient())
-    }
-
-    fun provideTrackInteractor(): TrackInteractor {
-        return TracksInteractorImpl(getTrackRepository())
     }
 
     private fun getThemeRepository(): ThemeRepositoryImpl {
@@ -52,6 +38,6 @@ object Creator {
     }
 
     fun providePlayerControlUseCase(): PlayerControlUseCase {
-        return PlayerControlUseCase(PlayerRepositoryImpl(MediaPlayer()))
+        return PlayerControlUseCase(PlayerRepositoryImpl())
     }
 }

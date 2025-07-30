@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -84,12 +83,12 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
     }
 
     private fun setupObservers() {
-        viewModel.playerState.observe(viewLifecycleOwner, Observer { state ->
+        viewModel.playerState.observe(viewLifecycleOwner) { state ->
             state?.let {
                 updatePlayButtonIcon(it.status)
                 binding.previewTrackTime.text = it.currentPosition
             }
-        })
+        }
     }
 
     private fun updatePlayButtonIcon(status: AudioPlayerViewModel.PlayerState.Status) {
