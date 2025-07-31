@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class TrackRepositoryImpl(private val networkClient: NetworkClient) : TrackRepository {
-    override fun searchTrack(expression: String): Flow<List<Track>> {
+    override suspend fun searchTrack(expression: String): Flow<List<Track>> {
         return networkClient.doRequest(TrackSearchRequest(expression))
             .map { response ->
                 if (response.resultCode == 200) {

@@ -59,9 +59,11 @@ class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCas
     }
 
     fun pause() {
-        playerControlUseCase.pause()
-        _playerState.value = PlayerState(PlayerState.Status.PAUSED)
-        stopPositionUpdates()
+        if (playerState.value?.status == PlayerState.Status.PLAYING) {
+            playerControlUseCase.pause()
+            _playerState.value = PlayerState(PlayerState.Status.PAUSED)
+            stopPositionUpdates()
+        }
     }
 
     fun release() {
@@ -82,7 +84,7 @@ class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCas
         updatePositionJob = viewModelScope.launch {
             while (isActive) {
                 updateCurrentPosition()
-                delay(300)
+                delay(UPDATE_TIME)
             }
         }
     }
@@ -104,5 +106,9 @@ class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCas
     override fun onCleared() {
         super.onCleared()
         release()
+    }
+
+    companion object {
+        private const val UPDATE_TIME = 300L
     }
 }

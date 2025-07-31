@@ -45,7 +45,13 @@ class PlayerRepositoryImpl : PlayerRepository {
     }
 
     override fun pause() {
-        mediaPlayer?.pause()
+        try {
+            if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer?.pause()
+            }
+        } catch (e: IllegalStateException) {
+            release()
+        }
     }
 
     override fun release() {
@@ -66,6 +72,13 @@ class PlayerRepositoryImpl : PlayerRepository {
     }
 
     override fun setOnCompletionListener(listener: () -> Unit) {
-        onCompletionListener = listener
+        onCompletionListener = {
+            try {
+                listener.invoke()
+            } finally {
+                release()
+            }
+        }
+        mediaPlayer?.setOnCompletionListener { onCompletionListener?.invoke() }
     }
 }

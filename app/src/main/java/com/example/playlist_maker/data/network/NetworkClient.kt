@@ -4,5 +4,5 @@ import com.example.playlist_maker.data.dto.Response
 import kotlinx.coroutines.flow.Flow
 
 interface NetworkClient {
-    fun doRequest(dto: Any): Flow<Response>
+    suspend fun doRequest(dto: Any): Flow<Response>
 }
