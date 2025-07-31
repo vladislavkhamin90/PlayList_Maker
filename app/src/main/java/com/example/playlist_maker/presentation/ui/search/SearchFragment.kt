@@ -13,6 +13,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,8 +22,6 @@ import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
 import com.example.playlist_maker.presentation.ui.player.KEY
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,7 +46,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private var currentQuery: String = ""
 
     private val viewModel: SearchViewModel by viewModel()
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope = lifecycle.coroutineScope
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -209,6 +208,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         historyRecyclerView.adapter = TrackAdapter(tracks) { track ->
             clickDebounceJob?.cancel()
             clickDebounceJob = coroutineScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
                 navigateToPlayer(track)
             }
         }
@@ -238,5 +238,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 300L
     }
 }

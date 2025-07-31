@@ -11,7 +11,7 @@ import javax.inject.Inject
 class TrackInteractorImpl @Inject constructor(
     private val repository: TrackRepository
 ) : TrackInteractor {
-    override fun searchTrack(expression: String): Flow<List<Track>> {
+    override suspend fun searchTrack(expression: String): Flow<List<Track>> {
         return repository.searchTrack(expression)
             .catch { e ->
                 Log.e("TrackInteractor", "Error searching tracks", e)

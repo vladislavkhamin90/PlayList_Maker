@@ -11,7 +11,7 @@ import java.io.IOException
 class RetrofitNetworkClient(
     private val songsApi: SongsApi
 ) : NetworkClient {
-    override fun doRequest(dto: Any): Flow<Response> = flow {
+    override suspend fun doRequest(dto: Any): Flow<Response> = flow {
         try {
             if (dto is TrackSearchRequest) {
                 val response = songsApi.search(dto.expression)

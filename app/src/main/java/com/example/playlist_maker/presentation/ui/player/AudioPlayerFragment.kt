@@ -109,7 +109,10 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
 
     override fun onPause() {
         super.onPause()
-        viewModel.pause()
+        if (viewModel.playerState.value?.status ==
+            AudioPlayerViewModel.PlayerState.Status.PLAYING) {
+            viewModel.pause()
+        }
     }
 
     override fun onDestroyView() {
