@@ -6,11 +6,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
 import com.example.playlist_maker.domain.models.Track
 
-
 class TrackAdapter(
-    private val tracks: List<Track>,
-    private val onItemClicked: (Track) -> Unit):
-    RecyclerView.Adapter<TrackViewHolder>() {
+    var tracks: List<Track>,
+    private val onItemClicked: (Track) -> Unit
+) : RecyclerView.Adapter<TrackViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)

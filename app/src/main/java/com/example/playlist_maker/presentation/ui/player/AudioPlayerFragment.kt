@@ -29,6 +29,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
 
         val message = arguments?.getString(KEY)
         val track = gson.fromJson(message, Track::class.java)
+        viewModel.setTrack(track)
         initViews(track)
         setupObservers()
 
@@ -44,9 +45,35 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
             }
         }
 
+        binding.favorite.setOnClickListener {
+            viewModel.onFavoriteClicked()
+        }
+
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+    }
+
+    private fun setupObservers() {
+        viewModel.playerState.observe(viewLifecycleOwner) { state ->
+            state?.let {
+                updatePlayButtonIcon(it.status)
+                binding.previewTrackTime.text = it.currentPosition
+                updateFavoriteButton(it.isFavorite)
+            }
+        }
+    }
+
+    private fun updateFavoriteButton(isFavorite: Boolean) {
+        val isDarkTheme = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
+        val resId = when {
+            isFavorite && isDarkTheme -> R.drawable.favorite_active_dark_theme
+            isFavorite && !isDarkTheme -> R.drawable.favorite_active_white_theme
+            !isFavorite && isDarkTheme -> R.drawable.favorite_inactive_dark_theme
+            else -> R.drawable.favorite_inactive_white_theme
+        }
+        binding.favorite.setBackgroundResource(resId)
     }
 
     private fun initViews(track: Track) {
@@ -79,15 +106,6 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
             yearValue.text = track.releaseDate.substringBefore('-')
             genreValue.text = track.primaryGenreName
             countryValue.text = track.country
-        }
-    }
-
-    private fun setupObservers() {
-        viewModel.playerState.observe(viewLifecycleOwner) { state ->
-            state?.let {
-                updatePlayButtonIcon(it.status)
-                binding.previewTrackTime.text = it.currentPosition
-            }
         }
     }
 

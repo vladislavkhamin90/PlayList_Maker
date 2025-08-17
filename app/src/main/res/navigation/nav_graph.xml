@@ -17,6 +17,10 @@
         <action
             android:id="@+id/action_media_to_settings"
             app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_media_to_player"
+            app:destination="@id/playerFragment" />
     </fragment>
 
     <fragment
@@ -55,6 +59,8 @@
             app:popUpTo="@id/searchFragment"
             app:popUpToInclusive="false" />
     </fragment>
+
+
 
     <fragment
         android:id="@+id/settingsFragment"

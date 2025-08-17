@@ -3,13 +3,17 @@ package com.example.playlist_maker.di
 import android.content.Context
 import android.content.SharedPreferences
 import android.media.MediaPlayer
+import androidx.room.Room
+import com.example.playlist_maker.data.db.AppDatabase
 import com.example.playlist_maker.data.network.NetworkClient
 import com.example.playlist_maker.data.network.RetrofitNetworkClient
 import com.example.playlist_maker.data.network.SongsApi
+import com.example.playlist_maker.data.repository.FavoriteTracksRepositoryImpl
 import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
 import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
 import com.example.playlist_maker.data.repository.TrackRepositoryImpl
 import com.example.playlist_maker.data.sharedprefs.SearchHistory
+import com.example.playlist_maker.domain.repository.FavoriteTracksRepository
 import com.example.playlist_maker.domain.repository.PlayerRepository
 import com.example.playlist_maker.domain.repository.ThemeRepository
 import com.example.playlist_maker.domain.repository.TrackRepository
@@ -46,4 +50,10 @@ val dataModule = module {
 
     single { SearchHistory(androidContext()) }
 
+    single { Room.databaseBuilder(androidContext(), AppDatabase::class.java,"app_database"
+        ).build() }
+
+    single { get<AppDatabase>().favoriteTracksDao() }
+
+    single<FavoriteTracksRepository> { FavoriteTracksRepositoryImpl(get()) }
 }
