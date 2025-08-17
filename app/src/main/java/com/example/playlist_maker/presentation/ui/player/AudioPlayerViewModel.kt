@@ -1,9 +1,12 @@
 package com.example.playlist_maker.presentation.ui.player
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlist_maker.domain.api.FavoriteTracksInteractor
+import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -12,22 +15,66 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class AudioPlayerViewModel(private val playerControlUseCase: PlayerControlUseCase) : ViewModel() {
+class AudioPlayerViewModel(
+    private val playerControlUseCase: PlayerControlUseCase,
+    private val favoriteTracksInteractor: FavoriteTracksInteractor
+) : ViewModel() {
 
     data class PlayerState(
         val status: Status,
-        val currentPosition: String = "00:00"
+        val currentPosition: String = "00:00",
+        val isFavorite: Boolean = false
     ) {
         enum class Status {
             DEFAULT, PREPARED, PLAYING, PAUSED
         }
     }
 
+    private var currentTrack: Track? = null
     private val _playerState = MutableLiveData(PlayerState(PlayerState.Status.DEFAULT))
     val playerState: LiveData<PlayerState> = _playerState
 
     private var updatePositionJob: Job? = null
     private var currentUrl: String? = null
+
+    fun setTrack(track: Track) {
+        currentTrack = track
+        _playerState.postValue(
+            _playerState.value?.copy(
+                isFavorite = track.isFavorite
+            )
+        )
+
+        viewModelScope.launch {
+            val isFavorite = favoriteTracksInteractor.isFavorite(track.trackId)
+            if (isFavorite != track.isFavorite) {
+                track.isFavorite = isFavorite
+                _playerState.postValue(
+                    _playerState.value?.copy(
+                        isFavorite = isFavorite
+                    )
+                )
+            }
+        }
+    }
+
+    fun onFavoriteClicked() {
+        currentTrack?.let { track ->
+            viewModelScope.launch {
+                try {
+                    favoriteTracksInteractor.toggleFavorite(track)
+                    _playerState.postValue(
+                        _playerState.value?.copy(
+                            isFavorite = track.isFavorite
+                        )
+                    )
+                } catch (e: Exception) {
+
+                    Log.e("MyLog", "$e")
+                }
+            }
+        }
+    }
 
     fun preparePlayer(url: String) {
         if (currentUrl == url && playerState.value?.status == PlayerState.Status.PREPARED) {
