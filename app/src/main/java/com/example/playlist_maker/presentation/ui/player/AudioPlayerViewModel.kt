@@ -39,22 +39,16 @@ class AudioPlayerViewModel(
 
     fun setTrack(track: Track) {
         currentTrack = track
-        _playerState.postValue(
-            _playerState.value?.copy(
-                isFavorite = track.isFavorite
-            )
-        )
-
         viewModelScope.launch {
             val isFavorite = favoriteTracksInteractor.isFavorite(track.trackId)
-            if (isFavorite != track.isFavorite) {
-                track.isFavorite = isFavorite
-                _playerState.postValue(
-                    _playerState.value?.copy(
-                        isFavorite = isFavorite
-                    )
+            currentTrack?.isFavorite = isFavorite
+            _playerState.postValue(
+                PlayerState(
+                    status = PlayerState.Status.DEFAULT,
+                    isFavorite = isFavorite,
+                    currentPosition = "00:00"
                 )
-            }
+            )
         }
     }
 
@@ -62,14 +56,16 @@ class AudioPlayerViewModel(
         currentTrack?.let { track ->
             viewModelScope.launch {
                 try {
-                    favoriteTracksInteractor.toggleFavorite(track)
+                    val newFavoriteState = !track.isFavorite
                     _playerState.postValue(
-                        _playerState.value?.copy(
-                            isFavorite = track.isFavorite
-                        )
+                        _playerState.value?.copy(isFavorite = newFavoriteState)
                     )
+                    favoriteTracksInteractor.toggleFavorite(track)
+                    track.isFavorite = newFavoriteState
                 } catch (e: Exception) {
-
+                    _playerState.postValue(
+                        _playerState.value?.copy(isFavorite = track.isFavorite)
+                    )
                     Log.e("MyLog", "$e")
                 }
             }

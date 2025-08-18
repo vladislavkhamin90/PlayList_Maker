@@ -70,12 +70,12 @@ class FavoriteTracksFragment : Fragment() {
 
     private fun showEmptyState() {
         binding.recyclerView.visibility = View.GONE
-        binding.emptyState.visibility = View.VISIBLE
+        binding.root.findViewById<View>(R.id.emptyState).visibility = View.VISIBLE
     }
 
     private fun showContent(tracks: List<Track>) {
         binding.recyclerView.visibility = View.VISIBLE
-        binding.emptyState.visibility = View.GONE
+        binding.root.findViewById<View>(R.id.emptyState).visibility = View.GONE
         adapter.tracks = tracks
         adapter.notifyDataSetChanged()
     }
