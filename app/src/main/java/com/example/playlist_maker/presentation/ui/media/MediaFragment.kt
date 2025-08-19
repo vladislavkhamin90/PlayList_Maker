@@ -21,9 +21,8 @@ class MediaFragment : Fragment(R.layout.fragment_media) {
         super.onViewCreated(view, savedInstanceState)
 
         setupToolbar()
-        view.post {
-            setupViewPager()
-        }
+        setupViewPager()
+
     }
 
     override fun onCreateView(

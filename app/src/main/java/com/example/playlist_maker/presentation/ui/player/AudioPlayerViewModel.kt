@@ -31,7 +31,7 @@ class AudioPlayerViewModel(
     }
 
     private var currentTrack: Track? = null
-    private val _playerState = MutableLiveData(PlayerState(PlayerState.Status.DEFAULT))
+    private val _playerState = MutableLiveData(PlayerState(PlayerState.Status.DEFAULT, isFavorite = false))
     val playerState: LiveData<PlayerState> = _playerState
 
     private var updatePositionJob: Job? = null
@@ -40,19 +40,18 @@ class AudioPlayerViewModel(
     fun setTrack(track: Track) {
         currentTrack = track
         _playerState.postValue(
-            _playerState.value?.copy(
-                isFavorite = track.isFavorite
+            PlayerState(
+                status = PlayerState.Status.DEFAULT,
+                isFavorite = track.isFavorite,
+                currentPosition = "00:00"
             )
         )
-
         viewModelScope.launch {
-            val isFavorite = favoriteTracksInteractor.isFavorite(track.trackId)
-            if (isFavorite != track.isFavorite) {
-                track.isFavorite = isFavorite
+            val actualFavorite = favoriteTracksInteractor.isFavorite(track.trackId)
+            if (track.isFavorite != actualFavorite) {
+                track.isFavorite = actualFavorite
                 _playerState.postValue(
-                    _playerState.value?.copy(
-                        isFavorite = isFavorite
-                    )
+                    _playerState.value?.copy(isFavorite = actualFavorite)
                 )
             }
         }
@@ -62,14 +61,16 @@ class AudioPlayerViewModel(
         currentTrack?.let { track ->
             viewModelScope.launch {
                 try {
-                    favoriteTracksInteractor.toggleFavorite(track)
+                    val newFavoriteState = !track.isFavorite
                     _playerState.postValue(
-                        _playerState.value?.copy(
-                            isFavorite = track.isFavorite
-                        )
+                        _playerState.value?.copy(isFavorite = newFavoriteState)
                     )
+                    favoriteTracksInteractor.toggleFavorite(track)
+                    track.isFavorite = newFavoriteState
                 } catch (e: Exception) {
-
+                    _playerState.postValue(
+                        _playerState.value?.copy(isFavorite = track.isFavorite)
+                    )
                     Log.e("MyLog", "$e")
                 }
             }
@@ -82,20 +83,28 @@ class AudioPlayerViewModel(
         }
 
         currentUrl = url
-        _playerState.value = PlayerState(PlayerState.Status.DEFAULT)
         stopPositionUpdates()
 
         try {
             playerControlUseCase.prepare(url)
             playerControlUseCase.setOnPreparedListener {
-                _playerState.postValue(PlayerState(PlayerState.Status.PREPARED))
+                _playerState.postValue(
+                    _playerState.value?.copy(status = PlayerState.Status.PREPARED)
+                        ?: PlayerState(PlayerState.Status.PREPARED, isFavorite = currentTrack?.isFavorite ?: false)
+                )
             }
             playerControlUseCase.setOnCompletionListener {
-                _playerState.postValue(PlayerState(PlayerState.Status.PAUSED, "00:00"))
+                _playerState.postValue(
+                    _playerState.value?.copy(status = PlayerState.Status.PAUSED, currentPosition = "00:00")
+                        ?: PlayerState(PlayerState.Status.PAUSED, "00:00", currentTrack?.isFavorite ?: false)
+                )
                 stopPositionUpdates()
             }
         } catch (e: Exception) {
-            _playerState.postValue(PlayerState(PlayerState.Status.DEFAULT))
+            _playerState.postValue(
+                _playerState.value?.copy(status = PlayerState.Status.DEFAULT)
+                    ?: PlayerState(PlayerState.Status.DEFAULT, isFavorite = currentTrack?.isFavorite ?: false)
+            )
         }
     }
 
