@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlist_maker.domain.api.FavoriteTracksInteractor
+import com.example.playlist_maker.domain.api.PlaylistInteractor
+import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.domain.useCase.PlayerControlUseCase
 import kotlinx.coroutines.Job
@@ -17,7 +19,8 @@ import java.util.Locale
 
 class AudioPlayerViewModel(
     private val playerControlUseCase: PlayerControlUseCase,
-    private val favoriteTracksInteractor: FavoriteTracksInteractor
+    private val favoriteTracksInteractor: FavoriteTracksInteractor,
+    private val playlistInteractor: PlaylistInteractor
 ) : ViewModel() {
 
     data class PlayerState(
@@ -36,6 +39,15 @@ class AudioPlayerViewModel(
 
     private var updatePositionJob: Job? = null
     private var currentUrl: String? = null
+
+    private val _playlists = MutableLiveData<List<Playlist>>()
+    val playlists: LiveData<List<Playlist>> = _playlists
+
+
+    private val _addToPlaylistResult = MutableLiveData<AddToPlaylistResult>()
+    val addToPlaylistResult: LiveData<AddToPlaylistResult> = _addToPlaylistResult
+
+    private val _playlistTrackInfo = MutableLiveData<Map<Long, Boolean>>()
 
     fun setTrack(track: Track) {
         currentTrack = track
@@ -159,6 +171,46 @@ class AudioPlayerViewModel(
         )
     }
 
+    fun loadPlaylists() {
+        currentTrack?.let { track ->
+            viewModelScope.launch {
+                try {
+                    val playlistsWithTrack = playlistInteractor.getPlaylistsWithTrack(track.trackId.toLong())
+                    val allPlaylists = playlistInteractor.getAllPlaylists()
+
+                    val trackInfoMap = allPlaylists.associate { playlist ->
+                        playlist.id to playlistsWithTrack.any { it.id == playlist.id }
+                    }
+
+                    _playlists.postValue(allPlaylists)
+                    _playlistTrackInfo.postValue(trackInfoMap)
+                } catch (e: Exception) {
+                    Log.e("MyLog", "Error: $e")
+                }
+            }
+        }
+    }
+
+    fun addTrackToPlaylist(playlistId: Long) {
+        currentTrack?.let { track ->
+            viewModelScope.launch {
+                try {
+                    val success = playlistInteractor.addTrackToPlaylist(playlistId, track)
+                    if (success) {
+                        _addToPlaylistResult.postValue(AddToPlaylistResult.Success(playlistId))
+                    } else {
+                        _addToPlaylistResult.postValue(AddToPlaylistResult.AlreadyExists(playlistId))
+                    }
+                    loadPlaylists()
+                } catch (e: Exception) {
+                    Log.e("MyLog", "Error: $e")
+                }
+            }
+        }
+    }
+
+
+
     override fun onCleared() {
         super.onCleared()
         release()
@@ -166,5 +218,11 @@ class AudioPlayerViewModel(
 
     companion object {
         private const val UPDATE_TIME = 300L
+    }
+
+    sealed class AddToPlaylistResult {
+        data class Success(val playlistId: Long) : AddToPlaylistResult()
+        data class AlreadyExists(val playlistId: Long) : AddToPlaylistResult()
+        data class Error(val message: String) : AddToPlaylistResult()
     }
 }

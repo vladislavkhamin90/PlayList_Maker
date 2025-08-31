@@ -21,6 +21,10 @@
         <action
             android:id="@+id/action_media_to_player"
             app:destination="@id/playerFragment" />
+
+        <action
+            android:id="@+id/action_media_to_createPlaylist"
+            app:destination="@id/createPlaylistFragment" />
     </fragment>
 
     <fragment
@@ -58,6 +62,10 @@
             app:destination="@id/searchFragment"
             app:popUpTo="@id/searchFragment"
             app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/action_audioPlayer_to_createPlaylist"
+            app:destination="@id/createPlaylistFragment" />
     </fragment>
 
 
@@ -73,4 +81,17 @@
             app:popUpTo="@id/mediaFragment"
             app:popUpToInclusive="false" />
     </fragment>
+
+    <fragment
+        android:id="@+id/createPlaylistFragment"
+        android:name="com.example.playlist_maker.presentation.ui.media.CreatePlayListFragment"
+        tools:layout="@layout/fragment_create_playlist">
+
+        <action
+            android:id="@+id/action_createPlaylist_to_playlist"
+            app:destination="@id/mediaFragment"
+            app:popUpTo="@id/mediaFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+
 </navigation>

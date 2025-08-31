@@ -174,5 +174,19 @@
         <item name="itemBackground">@color/white</item>
     </style>
 
+    <style name="playlist_text_input_layout" parent="playlist_text_input_layout_general">
+        <item name="boxStrokeColor">@color/selector_text_input_border_white_theme</item>
+        <item name="hintTextColor">@color/selector_text_input_hint_white_theme</item>
+        <item name="android:textColorHint">@color/selector_text_input_hint_white_theme</item>
+    </style>
+
+    <style name="playlist_text_input_edit_text" parent="playlist_text_input_edit_text_general">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="bottom_sheet_background">
+        <item name="android:background">@drawable/bottom_sheet_background_white_theme</item>
+    </style>
+
 
 </resources>

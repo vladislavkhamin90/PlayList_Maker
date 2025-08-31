@@ -2,15 +2,19 @@ package com.example.playlist_maker.presentation.ui.player
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlist_maker.R
 import com.example.playlist_maker.databinding.FragmentAudioPlayerBinding
 import com.example.playlist_maker.domain.models.Track
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -22,6 +26,8 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
     private val binding get() = _binding!!
     private val gson = Gson()
     private val viewModel: AudioPlayerViewModel by viewModel()
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var playlistAdapter: PlaylistSelectionAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,6 +37,8 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         val track = gson.fromJson(message, Track::class.java)
         viewModel.setTrack(track)
         initViews(track)
+        setupBottomSheet()
+        setupPlaylistRecyclerView()
         setupObservers()
 
         track.previewUrl?.let { url ->
@@ -49,8 +57,17 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
             viewModel.onFavoriteClicked()
         }
 
+        binding.queue.setOnClickListener {
+            viewModel.loadPlaylists()
+            showPlaylistSelectionBottomSheet()
+        }
+
         binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                hidePlaylistSelectionBottomSheet()
+            } else {
+                findNavController().navigateUp()
+            }
         }
     }
 
@@ -60,6 +77,38 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
                 updatePlayButtonIcon(it.status)
                 binding.previewTrackTime.text = it.currentPosition
                 updateFavoriteButton(it.isFavorite)
+            }
+        }
+
+        viewModel.playlists.observe(viewLifecycleOwner) { playlists ->
+            playlistAdapter.updatePlaylists(playlists)
+        }
+
+        viewModel.addToPlaylistResult.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is AudioPlayerViewModel.AddToPlaylistResult.Success -> {
+                    val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name
+                    Toast.makeText(
+                        requireContext(),
+                        "Добавлено в плейлист $playlistName",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is AudioPlayerViewModel.AddToPlaylistResult.AlreadyExists -> {
+                    val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name
+                    Toast.makeText(
+                        requireContext(),
+                        "Трек уже добавлен в плейлист $playlistName",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is AudioPlayerViewModel.AddToPlaylistResult.Error -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "Ошибка: ${result.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -78,7 +127,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
 
     private fun initViews(track: Track) {
         fun getCoverArtwork(track: Track) =
-            track.artworkUrl100.replaceAfterLast('/',"512x512bb.jpg")
+            track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
 
         val cornerRadius = resources.getDimensionPixelSize(R.dimen.image_corner_radius)
 
@@ -109,6 +158,52 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         }
     }
 
+    private fun setupBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.playlistsBottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        binding.overlay.visibility = View.GONE
+                        binding.overlay.isClickable = false
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        binding.overlay.visibility = View.VISIBLE
+                        binding.overlay.isClickable = true
+                    }
+                    else -> {
+                        binding.overlay.visibility = View.VISIBLE
+                        binding.overlay.isClickable = true
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                binding.overlay.alpha = slideOffset.coerceIn(0f, 1f)
+            }
+        })
+
+        binding.overlay.setOnClickListener {
+            hidePlaylistSelectionBottomSheet()
+        }
+
+        binding.newPlaylistBtn.setOnClickListener {
+            navigateToCreatePlaylist()
+        }
+    }
+
+    private fun setupPlaylistRecyclerView() {
+        playlistAdapter = PlaylistSelectionAdapter(emptyList()) { playlist ->
+            viewModel.addTrackToPlaylist(playlist.id)
+            hidePlaylistSelectionBottomSheet()
+        }
+
+        binding.playlistsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.playlistsRecyclerView.adapter = playlistAdapter
+    }
+
     private fun updatePlayButtonIcon(status: AudioPlayerViewModel.PlayerState.Status) {
         val isDarkTheme = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
@@ -125,11 +220,27 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         binding.play.setBackgroundResource(resId)
     }
 
+    private fun showPlaylistSelectionBottomSheet() {
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
+    private fun hidePlaylistSelectionBottomSheet() {
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    private fun navigateToCreatePlaylist() {
+        hidePlaylistSelectionBottomSheet()
+        findNavController().navigate(R.id.action_audioPlayer_to_createPlaylist)
+    }
+
     override fun onPause() {
         super.onPause()
         if (viewModel.playerState.value?.status ==
             AudioPlayerViewModel.PlayerState.Status.PLAYING) {
             viewModel.pause()
+        }
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            hidePlaylistSelectionBottomSheet()
         }
     }
 
