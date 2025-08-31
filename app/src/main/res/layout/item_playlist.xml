@@ -1,0 +1,43 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginBottom="@dimen/_16dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="196dp"
+        style="@style/audio_player_background"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/playlist_cover"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_big"
+            app:shapeAppearanceOverlay="@style/playlist_image"
+            android:contentDescription="@string/playlist_cover" />
+
+        <TextView
+            android:id="@+id/playlist_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            style="@style/player_text_color"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/playlist_track_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/player_text_color"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -2,7 +2,6 @@ package com.example.playlist_maker.di
 
 import android.content.Intent
 import com.example.playlist_maker.data.sharedprefs.SearchHistory
-import com.example.playlist_maker.domain.api.FavoriteTracksInteractor
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
 import com.example.playlist_maker.presentation.ui.media.FavoriteTracksViewModel
@@ -21,7 +20,7 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    viewModel { AudioPlayerViewModel(get(), get<FavoriteTracksInteractor>()) }
+    viewModel { AudioPlayerViewModel(get(), get(), get()) }
 
     viewModel { FavoriteTracksViewModel(get()) }
 
@@ -31,9 +30,9 @@ val appModule = module {
 
     viewModel { MediaViewModel() }
 
-    viewModel { PlaylistViewModel() }
+    viewModel { PlaylistViewModel(get()) }
 
-    factory { AudioPlayerViewModelFactory(get(), get()) }
+    factory { AudioPlayerViewModelFactory(get(), get(), get()) }
 
     factory { SearchViewModelFactory(get(), androidContext()) }
 

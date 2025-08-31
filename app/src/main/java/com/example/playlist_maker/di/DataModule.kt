@@ -5,16 +5,20 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import androidx.room.Room
 import com.example.playlist_maker.data.db.AppDatabase
+import com.example.playlist_maker.data.db.PlaylistDao
+import com.example.playlist_maker.data.db.PlaylistTrackDao
 import com.example.playlist_maker.data.network.NetworkClient
 import com.example.playlist_maker.data.network.RetrofitNetworkClient
 import com.example.playlist_maker.data.network.SongsApi
 import com.example.playlist_maker.data.repository.FavoriteTracksRepositoryImpl
 import com.example.playlist_maker.data.repository.PlayerRepositoryImpl
+import com.example.playlist_maker.data.repository.PlaylistRepositoryImpl
 import com.example.playlist_maker.data.repository.ThemeRepositoryImpl
 import com.example.playlist_maker.data.repository.TrackRepositoryImpl
 import com.example.playlist_maker.data.sharedprefs.SearchHistory
 import com.example.playlist_maker.domain.repository.FavoriteTracksRepository
 import com.example.playlist_maker.domain.repository.PlayerRepository
+import com.example.playlist_maker.domain.repository.PlaylistRepository
 import com.example.playlist_maker.domain.repository.ThemeRepository
 import com.example.playlist_maker.domain.repository.TrackRepository
 import com.google.gson.Gson
@@ -50,10 +54,19 @@ val dataModule = module {
 
     single { SearchHistory(androidContext()) }
 
-    single { Room.databaseBuilder(androidContext(), AppDatabase::class.java,"app_database"
-        ).build() }
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "app_database")
+            .fallbackToDestructiveMigration()
+            .build()
+    }
 
     single { get<AppDatabase>().favoriteTracksDao() }
 
+    single<PlaylistDao> { get<AppDatabase>().playlistDao() }
+
+    single<PlaylistTrackDao> { get<AppDatabase>().playlistTrackDao() }
+
     single<FavoriteTracksRepository> { FavoriteTracksRepositoryImpl(get()) }
+
+    single<PlaylistRepository> { PlaylistRepositoryImpl(get(), get(), get()) }
 }
