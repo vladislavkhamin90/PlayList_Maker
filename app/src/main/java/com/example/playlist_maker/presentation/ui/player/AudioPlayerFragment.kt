@@ -29,6 +29,32 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var playlistAdapter: PlaylistSelectionAdapter
 
+    private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            if (_binding == null) return
+
+            when (newState) {
+                BottomSheetBehavior.STATE_HIDDEN -> {
+                    binding.overlay.visibility = View.GONE
+                    binding.overlay.isClickable = false
+                }
+                BottomSheetBehavior.STATE_EXPANDED -> {
+                    binding.overlay.visibility = View.VISIBLE
+                    binding.overlay.isClickable = true
+                }
+                else -> {
+                    binding.overlay.visibility = View.VISIBLE
+                    binding.overlay.isClickable = true
+                }
+            }
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            if (_binding == null) return
+            binding.overlay.alpha = slideOffset.coerceIn(0f, 1f)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAudioPlayerBinding.bind(view)
@@ -87,10 +113,10 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         viewModel.addToPlaylistResult.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is AudioPlayerViewModel.AddToPlaylistResult.Success -> {
-                    val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name
+                    val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name ?:return@observe
                     Toast.makeText(
                         requireContext(),
-                        "Добавлено в плейлист $playlistName",
+                        "${R.string.add_playlist}$playlistName",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -98,14 +124,14 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
                     val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name
                     Toast.makeText(
                         requireContext(),
-                        "Трек уже добавлен в плейлист $playlistName",
+                        "${R.string.already_added_playlist} $playlistName",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 is AudioPlayerViewModel.AddToPlaylistResult.Error -> {
                     Toast.makeText(
                         requireContext(),
-                        "Ошибка: ${result.message}",
+                        "${R.string.error}: ${result.message}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -162,28 +188,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.playlistsBottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                        binding.overlay.visibility = View.GONE
-                        binding.overlay.isClickable = false
-                    }
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        binding.overlay.visibility = View.VISIBLE
-                        binding.overlay.isClickable = true
-                    }
-                    else -> {
-                        binding.overlay.visibility = View.VISIBLE
-                        binding.overlay.isClickable = true
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                binding.overlay.alpha = slideOffset.coerceIn(0f, 1f)
-            }
-        })
+        bottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
 
         binding.overlay.setOnClickListener {
             hidePlaylistSelectionBottomSheet()
@@ -246,6 +251,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        bottomSheetBehavior.removeBottomSheetCallback(bottomSheetCallback)
         _binding = null
     }
 

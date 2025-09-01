@@ -43,6 +43,8 @@ class AudioPlayerViewModel(
     private val _playlists = MutableLiveData<List<Playlist>>()
     val playlists: LiveData<List<Playlist>> = _playlists
 
+    private var playlistsJob: Job? = null
+
 
     private val _addToPlaylistResult = MutableLiveData<AddToPlaylistResult>()
     val addToPlaylistResult: LiveData<AddToPlaylistResult> = _addToPlaylistResult
@@ -172,20 +174,16 @@ class AudioPlayerViewModel(
     }
 
     fun loadPlaylists() {
-        currentTrack?.let { track ->
-            viewModelScope.launch {
-                try {
+        playlistsJob?.cancel()
+        playlistsJob = viewModelScope.launch {
+            playlistInteractor.getAllPlaylists().collect { playlists ->
+                currentTrack?.let { track ->
                     val playlistsWithTrack = playlistInteractor.getPlaylistsWithTrack(track.trackId.toLong())
-                    val allPlaylists = playlistInteractor.getAllPlaylists()
-
-                    val trackInfoMap = allPlaylists.associate { playlist ->
+                    val trackInfoMap = playlists.associate { playlist ->
                         playlist.id to playlistsWithTrack.any { it.id == playlist.id }
                     }
-
-                    _playlists.postValue(allPlaylists)
+                    _playlists.postValue(playlists)
                     _playlistTrackInfo.postValue(trackInfoMap)
-                } catch (e: Exception) {
-                    Log.e("MyLog", "Error: $e")
                 }
             }
         }
@@ -209,10 +207,9 @@ class AudioPlayerViewModel(
         }
     }
 
-
-
     override fun onCleared() {
         super.onCleared()
+        playlistsJob?.cancel()
         release()
     }
 

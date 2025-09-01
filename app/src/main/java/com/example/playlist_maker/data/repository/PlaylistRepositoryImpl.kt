@@ -7,6 +7,8 @@ import com.example.playlist_maker.data.db.PlaylistTrackEntity
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.domain.repository.PlaylistRepository
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class PlaylistRepositoryImpl(
     private val playlistDao: PlaylistDao,
@@ -37,7 +39,7 @@ class PlaylistRepositoryImpl(
         return playlistDao.getPlaylistById(playlistId)
     }
 
-    override suspend fun getAllPlaylists(): List<PlaylistEntity> {
+    override fun getAllPlaylists(): Flow<List<PlaylistEntity>> {
         return playlistDao.getAllPlaylists()
     }
 
@@ -72,7 +74,7 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun getPlaylistsWithTrack(trackId: Long): List<PlaylistEntity> {
-        val allPlaylists = playlistDao.getAllPlaylists()
+        val allPlaylists = playlistDao.getAllPlaylists().first()
         return allPlaylists.filter { playlist ->
             val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
             trackIds.contains(trackId)

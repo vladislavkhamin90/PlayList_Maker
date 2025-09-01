@@ -2,6 +2,7 @@ package com.example.playlist_maker.domain.api
 
 import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
+import kotlinx.coroutines.flow.Flow
 
 interface PlaylistInteractor {
     suspend fun createPlaylist(
@@ -10,7 +11,7 @@ interface PlaylistInteractor {
         coverImagePath: String?
     ): Long
 
-    suspend fun getAllPlaylists(): List<Playlist>
+    fun getAllPlaylists(): Flow<List<Playlist>>
     suspend fun getPlaylistById(playlistId: Long): Playlist?
     suspend fun updatePlaylist(playlist: Playlist)
     suspend fun deletePlaylist(playlistId: Long)

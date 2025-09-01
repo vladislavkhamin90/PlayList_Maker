@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.example.playlist_maker.R
 import com.example.playlist_maker.databinding.FragmentCreatePlaylistBinding
 import com.example.playlist_maker.domain.api.PlaylistInteractor
+import com.example.playlist_maker.presentation.ui.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +38,12 @@ class CreatePlayListFragment : Fragment() {
 
     private val playlistInteractor: PlaylistInteractor by inject()
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            checkForUnsavedChangesAndNavigate()
+        }
+    }
+
     private val photoPickerLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -43,6 +52,11 @@ class CreatePlayListFragment : Fragment() {
             loadSelectedImage(it)
             hasUnsavedChanges = true
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     override fun onCreateView(
@@ -55,6 +69,8 @@ class CreatePlayListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireActivity() as MainActivity).hideBottomNav()
 
         binding.toolbar.setNavigationOnClickListener {
             checkForUnsavedChangesAndNavigate()
@@ -126,7 +142,10 @@ class CreatePlayListFragment : Fragment() {
     }
 
     private fun openPhotoPicker() {
-        photoPickerLauncher.launch(null)
+        photoPickerLauncher.launch(
+            PickVisualMediaRequest.Builder()
+            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            .build())
     }
 
     private fun loadSelectedImage(uri: Uri) {
@@ -159,13 +178,14 @@ class CreatePlayListFragment : Fragment() {
     }
 
     private fun updateCreateButtonState() {
-        val isNameEmpty = binding.playlistNameEditText.text?.toString().isNullOrEmpty()
-        binding.createBtn.isEnabled = !isNameEmpty
+        val name = binding.playlistNameEditText.text?.toString().orEmpty()
+        val isNameValid = name.trim().isNotEmpty()
 
-        if (isNameEmpty) {
-            binding.createBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
-        } else {
+        binding.createBtn.isEnabled = isNameValid
+        if (isNameValid) {
             binding.createBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blue_theme))
+        } else {
+            binding.createBtn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.gray))
         }
     }
 
@@ -186,13 +206,18 @@ class CreatePlayListFragment : Fragment() {
             }
             .setNegativeButton(getString(R.string.exit_dialog_confirm)) { dialog, _ ->
                 dialog.dismiss()
+                onBackPressedCallback.isEnabled = false
                 findNavController().navigateUp()
+            }
+            .setOnCancelListener {
+                onBackPressedCallback.isEnabled = true
             }
             .show()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        (requireActivity() as MainActivity).showBottomNav()
         _binding = null
     }
 }
