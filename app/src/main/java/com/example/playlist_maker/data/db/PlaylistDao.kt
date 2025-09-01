@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
@@ -18,7 +19,7 @@ interface PlaylistDao {
     suspend fun getPlaylistById(playlistId: Long): PlaylistEntity?
 
     @Query("SELECT * FROM playlists ORDER BY name ASC")
-    suspend fun getAllPlaylists(): List<PlaylistEntity>
+    fun getAllPlaylists(): Flow<List<PlaylistEntity>>
 
     @Query("DELETE FROM playlists WHERE playlist_id = :playlistId")
     suspend fun deletePlaylist(playlistId: Long)

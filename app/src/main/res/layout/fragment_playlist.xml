@@ -8,8 +8,8 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/new_playlist_btn"
-        android:layout_width="135dp"
-        android:layout_height="36dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/new_playlist"
         style="@style/media_btn"
         android:layout_marginTop="@dimen/_24dp" />

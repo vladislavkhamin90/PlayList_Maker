@@ -17,20 +17,29 @@ class PlaylistViewModel(
     val playlists: LiveData<List<Playlist>> = _playlists
 
     private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private var playlistsJob: kotlinx.coroutines.Job? = null
 
     fun loadPlaylists() {
+        playlistsJob?.cancel()
         _isLoading.value = true
 
-        viewModelScope.launch {
+        playlistsJob = viewModelScope.launch {
             try {
-                val playlists = playlistInteractor.getAllPlaylists()
-                _playlists.value = playlists
+                playlistInteractor.getAllPlaylists().collect { playlists ->
+                    _playlists.value = playlists
+                    _isLoading.value = false
+                }
             } catch (e: Exception) {
-                Log.e("MyLog", "$e")
-            } finally {
+                Log.e("MyLog", "Error loading playlists: $e")
                 _isLoading.value = false
             }
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        playlistsJob?.cancel()
+    }
 }

@@ -21,10 +21,11 @@
 
         <ImageView
             android:id="@+id/playlist_image"
-            android:layout_width="312dp"
-            android:layout_height="312dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="26dp"
+            android:layout_marginHorizontal="@dimen/_24dp"
             android:background="@drawable/empty_draw"
             />
 
@@ -66,6 +67,12 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/create_btn"
             android:layout_width="match_parent"
@@ -78,11 +85,9 @@
             android:fontFamily="@font/ys_text"
             android:textColor="@color/white"
             android:backgroundTint="@color/blue_theme"
+            android:layout_marginBottom="32dp"
             />
 
     </LinearLayout>
-
-
-
 
 </FrameLayout>

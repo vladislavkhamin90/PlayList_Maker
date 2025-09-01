@@ -4,6 +4,8 @@ import com.example.playlist_maker.domain.api.PlaylistInteractor
 import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.domain.repository.PlaylistRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class PlaylistInteractorImpl(
     private val playlistRepository: PlaylistRepository
@@ -17,8 +19,10 @@ class PlaylistInteractorImpl(
         return playlistRepository.createPlaylist(name, description, coverImagePath)
     }
 
-    override suspend fun getAllPlaylists(): List<Playlist> {
-        return playlistRepository.getAllPlaylists().map { it.toDomain() }
+    override fun getAllPlaylists(): Flow<List<Playlist>> {
+        return playlistRepository.getAllPlaylists().map { list ->
+            list.map { it.toDomain() }
+        }
     }
 
     override suspend fun getPlaylistById(playlistId: Long): Playlist? {
