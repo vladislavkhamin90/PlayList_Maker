@@ -14,6 +14,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlist_maker.R
 import com.example.playlist_maker.databinding.FragmentAudioPlayerBinding
 import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.presentation.ui.main.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -58,6 +59,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAudioPlayerBinding.bind(view)
+
 
         val message = arguments?.getString(KEY)
         val track = gson.fromJson(message, Track::class.java)
@@ -116,7 +118,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
                     val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name ?:return@observe
                     Toast.makeText(
                         requireContext(),
-                        "${R.string.add_playlist}$playlistName",
+                        "Добавлено в плейлист $playlistName",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -124,7 +126,7 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
                     val playlistName = viewModel.playlists.value?.find { it.id == result.playlistId }?.name
                     Toast.makeText(
                         requireContext(),
-                        "${R.string.already_added_playlist} $playlistName",
+                        "Трек уже добавлен в плейлист $playlistName",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -247,6 +249,12 @@ class AudioPlayerFragment : Fragment(R.layout.fragment_audio_player) {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             hidePlaylistSelectionBottomSheet()
         }
+        (requireActivity() as MainActivity).showBottomNav()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).hideBottomNav()
     }
 
     override fun onDestroyView() {
