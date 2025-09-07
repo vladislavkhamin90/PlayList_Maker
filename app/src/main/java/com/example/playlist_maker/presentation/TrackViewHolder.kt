@@ -9,22 +9,26 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlist_maker.R
 import com.example.playlist_maker.domain.models.Track
 
+class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-
-    private val nameTrack: TextView = itemView.findViewById(R.id.title_music)
-    private val artistTrack: TextView = itemView.findViewById(R.id.artist)
-    private val time: TextView = itemView.findViewById(R.id.time)
     private val image: ImageView = itemView.findViewById(R.id.image)
+    private val titleMusic: TextView = itemView.findViewById(R.id.title_music)
+    private val artist: TextView = itemView.findViewById(R.id.artist)
+    private val time: TextView = itemView.findViewById(R.id.time)
 
-    fun bind(track: Track){
-        nameTrack.text = track.trackName
-        artistTrack.text = track.artistName
+    fun bind(track: Track) {
+        titleMusic.text = track.trackName
+        artist.text = track.artistName
         time.text = track.trackTimeMillis
 
-        Glide.with(itemView)
-            .load(track.artworkUrl100).transform(RoundedCorners(2))
-            .placeholder(R.drawable.placeholder)
-            .into(image)
+        if (track.artworkUrl100.isNotEmpty()) {
+            Glide.with(itemView)
+                .load(track.artworkUrl100.replace("100x100", "500x500"))
+                .placeholder(R.drawable.placeholder)
+                .transform(RoundedCorners(8))
+                .into(image)
+        } else {
+            image.setImageResource(R.drawable.placeholder)
+        }
     }
 }

@@ -34,6 +34,17 @@ class PlaylistFragment : Fragment() {
         setupObservers()
         setupClickListeners()
 
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>(
+            "playlist_deleted"
+        )?.observe(viewLifecycleOwner) { deleted ->
+            if (deleted) {
+                viewModel.loadPlaylists()
+                findNavController().currentBackStackEntry?.savedStateHandle?.set(
+                    "playlist_deleted", false
+                )
+            }
+        }
+
         viewModel.loadPlaylists()
     }
 
@@ -44,13 +55,20 @@ class PlaylistFragment : Fragment() {
 
     private fun setupRecyclerView() {
         playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->
-
+            navigateToPlaylistDetail(playlist.id)
         }
 
         binding.playlistsRecyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = playlistAdapter
         }
+    }
+
+    private fun navigateToPlaylistDetail(playlistId: Long) {
+        val bundle = Bundle().apply {
+            putLong("playlistId", playlistId)
+        }
+        findNavController().navigate(R.id.action_mediaFragment_to_playlistDetailFragment, bundle)
     }
 
     private fun setupObservers() {
@@ -83,6 +101,7 @@ class PlaylistFragment : Fragment() {
     private fun navigateToCreatePlaylist() {
         findNavController().navigate(R.id.action_media_to_createPlaylist)
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

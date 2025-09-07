@@ -15,4 +15,7 @@ interface PlaylistTrackDao {
 
     @Query("SELECT * FROM playlist_tracks")
     suspend fun getAllTracks(): List<PlaylistTrackEntity>
+
+    @Query("DELETE FROM playlist_tracks WHERE track_id = :trackId")
+    suspend fun deleteTrack(trackId: Long)
 }

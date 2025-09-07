@@ -111,4 +111,9 @@
         <item name="cornerSize">8dp</item>
     </style>
 
+    <style name="playlist_text">
+        <item name="android:fontFamily">@font/ys_text</item>
+        <item name="android:textColor">@color/dark_theme</item>
+    </style>
+
 </resources>

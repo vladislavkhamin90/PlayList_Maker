@@ -1,5 +1,6 @@
 package com.example.playlist_maker.data.repository
 
+import android.util.Log
 import com.example.playlist_maker.data.db.PlaylistDao
 import com.example.playlist_maker.data.db.PlaylistEntity
 import com.example.playlist_maker.data.db.PlaylistTrackDao
@@ -44,7 +45,16 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun deletePlaylist(playlistId: Long) {
+        Log.d("MyLog", "Deleting playlist with ID: $playlistId")
+        val playlist = playlistDao.getPlaylistById(playlistId) ?: return
+        val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+
         playlistDao.deletePlaylist(playlistId)
+        Log.d("MyLog", "Playlist deleted from database")
+
+        trackIds.forEach { trackId ->
+            cleanupUnusedTracks(trackId)
+        }
     }
 
     override suspend fun addTrackToPlaylist(playlistId: Long, track: Track): Boolean {
@@ -78,6 +88,49 @@ class PlaylistRepositoryImpl(
         return allPlaylists.filter { playlist ->
             val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
             trackIds.contains(trackId)
+        }
+    }
+
+    override suspend fun getPlaylistTracks(playlistId: Long): List<PlaylistTrackEntity> {
+        val playlist = playlistDao.getPlaylistById(playlistId) ?: return emptyList()
+        val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+
+        return trackIds.mapNotNull { trackId ->
+            playlistTrackDao.getTrackById(trackId)
+        }
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistId: Long, track: Track) {
+        try {
+            val playlist = playlistDao.getPlaylistById(playlistId) ?: return
+
+            val currentTrackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+                .toMutableList()
+
+            currentTrackIds.remove(track.trackId.toLong())
+
+            val updatedPlaylist = playlist.copy(
+                trackIds = gson.toJson(currentTrackIds),
+                trackCount = currentTrackIds.size
+            )
+
+            playlistDao.updatePlaylist(updatedPlaylist)
+
+            cleanupUnusedTracks(track.trackId.toLong())
+        } catch (e: Exception) {
+            Log.e("MyLog", "$e")
+        }
+    }
+
+    private suspend fun cleanupUnusedTracks(trackId: Long) {
+        val allPlaylists = playlistDao.getAllPlaylists().first()
+        val isTrackUsed = allPlaylists.any { playlist ->
+            val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+            trackIds.contains(trackId)
+        }
+
+        if (!isTrackUsed) {
+            playlistTrackDao.deleteTrack(trackId)
         }
     }
 }

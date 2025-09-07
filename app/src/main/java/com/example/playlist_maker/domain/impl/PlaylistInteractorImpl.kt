@@ -1,5 +1,7 @@
 package com.example.playlist_maker.domain.impl
 
+import android.util.Log
+import com.example.playlist_maker.data.db.PlaylistTrackEntity
 import com.example.playlist_maker.domain.api.PlaylistInteractor
 import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
@@ -35,6 +37,7 @@ class PlaylistInteractorImpl(
     }
 
     override suspend fun deletePlaylist(playlistId: Long) {
+        Log.d("MyLog", "Interactor deleting playlist: $playlistId")
         playlistRepository.deletePlaylist(playlistId)
     }
 
@@ -45,6 +48,29 @@ class PlaylistInteractorImpl(
     override suspend fun getPlaylistsWithTrack(trackId: Long): List<Playlist> {
         return playlistRepository.getPlaylistsWithTrack(trackId).map { it.toDomain() }
     }
+
+    override suspend fun getPlaylistTracks(playlistId: Long): List<Track> {
+        return playlistRepository.getPlaylistTracks(playlistId).map { it.toDomain() }
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistId: Long, track: Track) {
+        playlistRepository.removeTrackFromPlaylist(playlistId, track)
+    }
+}
+
+private fun PlaylistTrackEntity.toDomain(): Track {
+    return Track(
+        trackId = this.trackId.toInt(),
+        trackName = this.trackName,
+        artistName = this.artistName,
+        trackTimeMillis = this.trackTime,
+        artworkUrl100 = this.artworkUrl,
+        collectionName = this.collectionName,
+        releaseDate = this.releaseDate,
+        primaryGenreName = this.primaryGenreName,
+        country = this.country,
+        previewUrl = this.previewUrl
+    )
 }
 
 private fun com.example.playlist_maker.data.db.PlaylistEntity.toDomain(): Playlist {
