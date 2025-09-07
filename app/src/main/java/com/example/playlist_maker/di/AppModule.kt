@@ -4,8 +4,10 @@ import android.content.Intent
 import com.example.playlist_maker.data.sharedprefs.SearchHistory
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
+import com.example.playlist_maker.presentation.ui.media.CreatePlaylistViewModel
 import com.example.playlist_maker.presentation.ui.media.FavoriteTracksViewModel
 import com.example.playlist_maker.presentation.ui.media.MediaViewModel
+import com.example.playlist_maker.presentation.ui.media.PlaylistDetailViewModel
 import com.example.playlist_maker.presentation.ui.media.PlaylistViewModel
 import com.example.playlist_maker.presentation.ui.player.AudioPlayerViewModel
 import com.example.playlist_maker.presentation.ui.player.AudioPlayerViewModelFactory
@@ -31,6 +33,10 @@ val appModule = module {
     viewModel { MediaViewModel() }
 
     viewModel { PlaylistViewModel(get()) }
+
+    viewModel { PlaylistDetailViewModel(get()) }
+
+    viewModel { CreatePlaylistViewModel(get()) }
 
     factory { AudioPlayerViewModelFactory(get(), get(), get()) }
 

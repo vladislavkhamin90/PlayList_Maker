@@ -188,5 +188,9 @@
         <item name="android:background">@drawable/bottom_sheet_background_white_theme</item>
     </style>
 
+    <style name="box">
+        <item name="android:background">@color/gray</item>
+    </style>
+
 
 </resources>

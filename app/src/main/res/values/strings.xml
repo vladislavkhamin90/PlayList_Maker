@@ -6,6 +6,7 @@
     <string name="white_theme">Белая тема</string>
     <string name="dark_theme">Тёмная тема</string>
     <string name="share_app">Поделиться приложением</string>
+    <string name="share">Поделиться</string>
     <string name="support">Написать в поддержку</string>
     <string name="user_agreement">Пользовательское соглашение</string>
     <string name="settings">Настройки</string>
@@ -57,4 +58,16 @@
         <item quantity="many">%d треков</item>
         <item quantity="other">%d треков</item>
     </plurals>
+
+    <string name="delete_track_title">Удаление трека</string>
+    <string name="delete_track_message">Хотите удалить трек из плейлиста?</string>
+    <string name="yes">ДА</string>
+    <string name="no">НЕТ</string>
+    <string name="tracks">Треки</string>
+    <string name="edit">Редактировать информацию</string>
+    <string name="delete">Удалить</string>
+    <string name="edit_playlist">Редактировать</string>
+    <string name="save">Сохранить</string>
+    <string name="edit_playlist_title">Редактировать плейлист</string>
+    <string name="empty_playlist_message">В этом плейлисте нет списка треков, которым можно поделиться</string>
 </resources>
