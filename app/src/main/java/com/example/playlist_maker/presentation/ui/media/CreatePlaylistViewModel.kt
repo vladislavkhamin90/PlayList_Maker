@@ -60,7 +60,8 @@ class CreatePlaylistViewModel(
                 val updatedPlaylist = playlist.copy(
                     name = name,
                     description = description,
-                    coverImagePath = coverImagePath
+                    coverImagePath = coverImagePath,
+                    trackCount = playlist.trackCount
                 )
                 playlistInteractor.updatePlaylist(updatedPlaylist)
                 _navigateBack.value = true

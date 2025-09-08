@@ -2,6 +2,7 @@ package com.example.playlist_maker.presentation.ui.media
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,8 +17,10 @@ import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
 import com.example.playlist_maker.presentation.ui.main.MainActivity
+import com.example.playlist_maker.presentation.ui.player.KEY
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistDetailFragment : Fragment() {
@@ -27,6 +30,7 @@ class PlaylistDetailFragment : Fragment() {
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var menuBottomSheetBehavior: BottomSheetBehavior<View>
+    private val gson = Gson()
 
     private var playlistId: Long = -1
     private var menuBottomSheetCallback: BottomSheetBehavior.BottomSheetCallback? = null
@@ -35,6 +39,10 @@ class PlaylistDetailFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             playlistId = it.getLong(ARG_PLAYLIST_ID, -1)
+        }
+
+        trackAdapter = TrackAdapter(emptyList()) { track ->
+            navigateToPlayer(track)
         }
     }
 
@@ -58,8 +66,16 @@ class PlaylistDetailFragment : Fragment() {
         if (playlistId != -1L) {
             viewModel.loadPlaylist(playlistId)
         } else {
-            println("DEBUG: Invalid playlist ID")
+            Log.d("MyLog", "Invalid playlist ID")
         }
+    }
+
+    private fun navigateToPlayer(track: Track) {
+        val trackJson = gson.toJson(track)
+        val bundle = Bundle().apply {
+            putString(KEY, trackJson)
+        }
+        findNavController().navigate(R.id.action_playlistDetailFragment_to_playerFragment, bundle)
     }
 
     private fun setupBottomSheet() {
@@ -129,8 +145,14 @@ class PlaylistDetailFragment : Fragment() {
         }
 
         binding.menuShare.setOnClickListener {
-            hideMenu()
-            sharePlaylist()
+            val tracks = viewModel.tracks.value ?: emptyList()
+            if (tracks.isEmpty()) {
+                hideMenu()
+                showEmptyPlaylistShareMessage()
+            } else {
+                hideMenu()
+                sharePlaylist()
+            }
         }
 
         binding.menuDelete.setOnClickListener {
@@ -142,6 +164,14 @@ class PlaylistDetailFragment : Fragment() {
             hideMenu()
             navigateToEditPlaylist()
         }
+    }
+
+    private fun showEmptyPlaylistShareMessage() {
+        Toast.makeText(
+            requireContext(),
+            getString(R.string.empty_playlist_share_message),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun navigateToEditPlaylist() {
@@ -157,21 +187,36 @@ class PlaylistDetailFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.playlist.observe(viewLifecycleOwner) { playlist ->
+            Log.d("MyLog", "Playlist loaded: ${playlist?.name}, tracks: ${playlist?.trackCount}")
             playlist?.let { displayPlaylistInfo(it) }
         }
 
         viewModel.tracks.observe(viewLifecycleOwner) { tracks ->
-            if (tracks.isNotEmpty()) {
-                trackAdapter.updateTracks(tracks)
-                binding.bottomSheet.visibility = View.VISIBLE
-            } else {
-                trackAdapter.updateTracks(emptyList())
-                binding.bottomSheet.visibility = View.GONE
-            }
+            Log.d("MyLog", "Tracks loaded: ${tracks.size}")
+            updateUI(tracks)
+        }
+        viewModel.playlist.observe(viewLifecycleOwner) { playlist ->
+            playlist?.let { displayPlaylistInfo(it) }
+        }
+
+        viewModel.tracks.observe(viewLifecycleOwner) { tracks ->
+            updateUI(tracks)
         }
 
         viewModel.totalDuration.observe(viewLifecycleOwner) {
             updatePlaylistInfoText()
+        }
+    }
+
+    private fun updateUI(tracks: List<Track>) {
+        if (tracks.isNotEmpty()) {
+            trackAdapter.updateTracks(tracks)
+            binding.bottomSheet.visibility = View.VISIBLE
+            binding.emptyPlaylist.visibility = View.GONE
+        } else {
+            trackAdapter.updateTracks(emptyList())
+            binding.bottomSheet.visibility = View.GONE
+            binding.emptyPlaylist.visibility = View.VISIBLE
         }
     }
 
@@ -193,12 +238,6 @@ class PlaylistDetailFragment : Fragment() {
                 .load(playlist.coverImagePath)
                 .placeholder(R.drawable.placeholder_big)
                 .into(playlistCover)
-
-            if (playlist.trackCount > 0) {
-                bottomSheet.visibility = View.VISIBLE
-            } else {
-                bottomSheet.visibility = View.GONE
-            }
         }
     }
 
@@ -355,7 +394,7 @@ class PlaylistDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         menuBottomSheetCallback?.let {
-            menuBottomSheetBehavior.removeBottomSheetCallback(it)// !!!!!!!!!!!!!!!!!!!!!!
+            menuBottomSheetBehavior.removeBottomSheetCallback(it)
         }
         menuBottomSheetCallback = null
         _binding = null

@@ -95,7 +95,7 @@ class PlaylistRepositoryImpl(
         val playlist = playlistDao.getPlaylistById(playlistId) ?: return emptyList()
         val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
 
-        return trackIds.mapNotNull { trackId ->
+        return trackIds.reversed().mapNotNull { trackId ->
             playlistTrackDao.getTrackById(trackId)
         }
     }
