@@ -22,10 +22,11 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         time.text = track.trackTimeMillis
 
         if (track.artworkUrl100.isNotEmpty()) {
+            val radius = (8 * itemView.context.resources.displayMetrics.density).toInt()
             Glide.with(itemView)
                 .load(track.artworkUrl100.replace("100x100", "500x500"))
                 .placeholder(R.drawable.placeholder)
-                .transform(RoundedCorners(8))
+                .transform(RoundedCorners(radius))
                 .into(image)
         } else {
             image.setImageResource(R.drawable.placeholder)

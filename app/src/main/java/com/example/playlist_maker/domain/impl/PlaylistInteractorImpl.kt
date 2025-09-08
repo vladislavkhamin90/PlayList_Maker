@@ -32,8 +32,11 @@ class PlaylistInteractorImpl(
     }
 
     override suspend fun updatePlaylist(playlist: Playlist) {
-        val entity = playlist.toEntity()
-        playlistRepository.updatePlaylist(entity)
+        val originalPlaylist = playlistRepository.getPlaylistById(playlist.id)
+        originalPlaylist?.let { original ->
+            val entity = playlist.toEntity(original.trackIds)
+            playlistRepository.updatePlaylist(entity)
+        }
     }
 
     override suspend fun deletePlaylist(playlistId: Long) {
@@ -84,13 +87,13 @@ private fun com.example.playlist_maker.data.db.PlaylistEntity.toDomain(): Playli
     )
 }
 
-private fun Playlist.toEntity(): com.example.playlist_maker.data.db.PlaylistEntity {
+private fun Playlist.toEntity(trackIds: String): com.example.playlist_maker.data.db.PlaylistEntity {
     return com.example.playlist_maker.data.db.PlaylistEntity(
         playlistId = this.id,
         name = this.name,
         description = this.description,
         coverImagePath = this.coverImagePath,
-        trackIds = "[]",
+        trackIds = trackIds,
         trackCount = this.trackCount
     )
 }

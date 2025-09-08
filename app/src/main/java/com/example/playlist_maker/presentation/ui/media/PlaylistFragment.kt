@@ -12,6 +12,9 @@ import com.example.playlist_maker.databinding.FragmentPlaylistBinding
 import com.example.playlist_maker.domain.models.Playlist
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+const val PLAYLIST_DELETE_KEY = "playlist_deleted"
+const val PLAYLIST_ID_KEY = "playlistId"
+
 class PlaylistFragment : Fragment() {
     private val viewModel: PlaylistViewModel by viewModel()
     private var _binding: FragmentPlaylistBinding? = null
@@ -35,12 +38,12 @@ class PlaylistFragment : Fragment() {
         setupClickListeners()
 
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>(
-            "playlist_deleted"
+            PLAYLIST_DELETE_KEY
         )?.observe(viewLifecycleOwner) { deleted ->
             if (deleted) {
                 viewModel.loadPlaylists()
                 findNavController().currentBackStackEntry?.savedStateHandle?.set(
-                    "playlist_deleted", false
+                    PLAYLIST_DELETE_KEY, false
                 )
             }
         }
@@ -66,7 +69,7 @@ class PlaylistFragment : Fragment() {
 
     private fun navigateToPlaylistDetail(playlistId: Long) {
         val bundle = Bundle().apply {
-            putLong("playlistId", playlistId)
+            putLong(PLAYLIST_ID_KEY, playlistId)
         }
         findNavController().navigate(R.id.action_mediaFragment_to_playlistDetailFragment, bundle)
     }

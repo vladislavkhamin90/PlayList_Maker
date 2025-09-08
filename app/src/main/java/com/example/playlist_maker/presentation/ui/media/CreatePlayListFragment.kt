@@ -52,7 +52,11 @@ class CreatePlayListFragment : Fragment() {
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            handleBackPress()
+            if (isEditMode) {
+                navigateBack()
+            } else {
+                handleBackPress()
+            }
         }
     }
 
@@ -97,7 +101,11 @@ class CreatePlayListFragment : Fragment() {
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            handleBackPress()
+            if (isEditMode) {
+                navigateBack()
+            } else {
+                handleBackPress()
+            }
         }
     }
 
@@ -169,14 +177,18 @@ class CreatePlayListFragment : Fragment() {
     }
 
     private fun handleBackPress() {
-        val name = binding.playlistNameEditText.text.toString()
-        val description = binding.playlistDescriptionEditText.text.toString()
-        val hasCover = viewModel.playlistCoverPath.value != null
-
-        if (hasChanges || name.isNotBlank() || description.isNotBlank() || hasCover) {
-            showExitDialog()
-        } else {
+        if (isEditMode) {
             navigateBack()
+        } else {
+            val name = binding.playlistNameEditText.text.toString()
+            val description = binding.playlistDescriptionEditText.text.toString()
+            val hasCover = viewModel.playlistCoverPath.value != null
+
+            if (hasChanges || name.isNotBlank() || description.isNotBlank() || hasCover) {
+                showExitDialog()
+            } else {
+                navigateBack()
+            }
         }
     }
 
