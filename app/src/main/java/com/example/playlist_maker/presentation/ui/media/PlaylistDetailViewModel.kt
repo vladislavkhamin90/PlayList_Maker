@@ -1,5 +1,6 @@
 package com.example.playlist_maker.presentation.ui.media
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.playlist_maker.domain.api.PlaylistInteractor
 import com.example.playlist_maker.domain.models.Playlist
 import com.example.playlist_maker.domain.models.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class PlaylistDetailViewModel(
@@ -21,6 +25,8 @@ class PlaylistDetailViewModel(
 
     private val _totalDuration = MutableLiveData<Long>(0)
     val totalDuration: LiveData<Long> = _totalDuration
+
+    private var deleteJob: Job? = null
 
     fun loadPlaylist(playlistId: Long) {
         viewModelScope.launch {
@@ -64,8 +70,20 @@ class PlaylistDetailViewModel(
     }
 
     fun deletePlaylist(playlistId: Long) {
-        viewModelScope.launch {
-            playlistInteractor.deletePlaylist(playlistId)
+        deleteJob?.cancel()
+
+        deleteJob = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                playlistInteractor.deletePlaylist(playlistId)
+                Log.d("MyLog", "Playlist $playlistId successfully deleted")
+            } catch (e: Exception) {
+                Log.e("MyLog", "Error deleting playlist: $e")
+            }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        deleteJob?.cancel()
     }
 }

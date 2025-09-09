@@ -46,14 +46,26 @@ class PlaylistRepositoryImpl(
 
     override suspend fun deletePlaylist(playlistId: Long) {
         Log.d("MyLog", "Deleting playlist with ID: $playlistId")
-        val playlist = playlistDao.getPlaylistById(playlistId) ?: return
-        val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+
+        val playlist = playlistDao.getPlaylistById(playlistId)
+        if (playlist == null) {
+            Log.d("MyLog", "Playlist with ID $playlistId not found")
+            return
+        }
+
+        Log.d("MyLog", "Found playlist: ${playlist.name}, track count: ${playlist.trackCount}")
 
         playlistDao.deletePlaylist(playlistId)
         Log.d("MyLog", "Playlist deleted from database")
 
-        trackIds.forEach { trackId ->
-            cleanupUnusedTracks(trackId)
+        try {
+            val trackIds = gson.fromJson(playlist.trackIds, Array<Long>::class.java)
+            trackIds.forEach { trackId ->
+                cleanupUnusedTracks(trackId)
+            }
+            Log.d("MyLog", "Cleaned up ${trackIds.size} tracks")
+        } catch (e: Exception) {
+            Log.e("MyLog", "Error parsing track IDs: $e")
         }
     }
 

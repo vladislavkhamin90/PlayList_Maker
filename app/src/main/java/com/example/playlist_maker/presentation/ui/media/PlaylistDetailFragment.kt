@@ -359,9 +359,10 @@ class PlaylistDetailFragment : Fragment() {
     private fun deletePlaylist() {
         viewModel.deletePlaylist(playlistId)
 
-        findNavController().previousBackStackEntry?.savedStateHandle?.set(
-            "playlist_deleted", true
-        )
+        val result = Bundle().apply {
+            putBoolean(PLAYLIST_DELETE_KEY, true)
+        }
+        parentFragmentManager.setFragmentResult(PLAYLIST_DELETE_KEY, result)
 
         findNavController().popBackStack()
     }
