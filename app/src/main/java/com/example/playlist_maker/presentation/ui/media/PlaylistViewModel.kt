@@ -32,7 +32,9 @@ class PlaylistViewModel(
                     _isLoading.value = false
                 }
             } catch (e: Exception) {
-                Log.e("MyLog", "Error loading playlists: $e")
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e("MyLog", "Error loading playlists: $e")
+                }
                 _isLoading.value = false
             }
         }

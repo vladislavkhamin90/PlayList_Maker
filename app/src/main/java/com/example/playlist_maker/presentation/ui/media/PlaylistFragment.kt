@@ -37,14 +37,12 @@ class PlaylistFragment : Fragment() {
         setupObservers()
         setupClickListeners()
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>(
-            PLAYLIST_DELETE_KEY
-        )?.observe(viewLifecycleOwner) { deleted ->
-            if (deleted) {
-                viewModel.loadPlaylists()
-                findNavController().currentBackStackEntry?.savedStateHandle?.set(
-                    PLAYLIST_DELETE_KEY, false
-                )
+        parentFragmentManager.setFragmentResultListener(PLAYLIST_DELETE_KEY, viewLifecycleOwner) { requestKey, bundle ->
+            if (requestKey == PLAYLIST_DELETE_KEY) {
+                val deleted = bundle.getBoolean(PLAYLIST_DELETE_KEY, false)
+                if (deleted) {
+                    viewModel.loadPlaylists()
+                }
             }
         }
 
