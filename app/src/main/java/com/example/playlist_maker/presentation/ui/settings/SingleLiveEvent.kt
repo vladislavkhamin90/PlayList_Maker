@@ -1,4 +1,3 @@
-// SingleLiveEvent.kt
 package com.example.playlist_maker.presentation.ui.settings
 
 import androidx.lifecycle.LifecycleOwner

@@ -6,7 +6,7 @@
     style="@style/audio_player_background"
     >
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/new_playlist_btn"
         android:layout_width="133dp"
         android:layout_height="36dp"

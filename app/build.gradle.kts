@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation (libs.androidx.core.ktx.v1160)
     implementation (libs.koin.android)
+    implementation (libs.androidx.navigation.fragment.ktx)
+    implementation (libs.androidx.navigation.ui.ktx)
     implementation (libs.material.v180)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

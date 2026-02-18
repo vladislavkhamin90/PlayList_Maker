@@ -1,6 +1,5 @@
 package com.example.playlist_maker.presentation.ui.search
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,24 +11,21 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.presentation.TrackAdapter
-import com.example.playlist_maker.presentation.ui.player.AudioPlayer
+import com.example.playlist_maker.presentation.ui.player.KEY
 import com.google.gson.Gson
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 const val CLICK_DEBOUNCE_DELAY = 1000L
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment(R.layout.fragment_search) {
 
     private lateinit var inputEditText: EditText
     private lateinit var historyRecyclerView: RecyclerView
@@ -41,7 +37,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var internetErrorView: View
     private lateinit var searchErrorView: View
     private lateinit var recyclerView: RecyclerView
-    private lateinit var toolBar: Toolbar
 
     private val gson = Gson()
     private var isClickAllowed = true
@@ -49,31 +44,19 @@ class SearchActivity : AppCompatActivity() {
 
     private val viewModel: SearchViewModel by viewModel()
 
-    companion object {
-        const val KEY = "KEY"
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_search)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        recyclerView = view.findViewById(R.id.recycle_view)
+        inputEditText = view.findViewById(R.id.inputEditText)
+        clearButton = view.findViewById(R.id.clearIcon)
+        mainView = view.findViewById(R.id.main)
+        youSearchText = view.findViewById(R.id.you_search)
+        clearHistoryBtn = view.findViewById(R.id.clear_history_btn)
+        historyRecyclerView = view.findViewById(R.id.historyRecyclerView)
+        progressBar = view.findViewById(R.id.progress_bar)
 
-        recyclerView = findViewById(R.id.recycle_view)
-        inputEditText = findViewById(R.id.inputEditText)
-        clearButton = findViewById(R.id.clearIcon)
-        mainView = findViewById(R.id.main)
-        youSearchText = findViewById(R.id.you_search)
-        clearHistoryBtn = findViewById(R.id.clear_history_btn)
-        historyRecyclerView = findViewById(R.id.historyRecyclerView)
-        progressBar = findViewById(R.id.progress_bar)
-        toolBar = findViewById(R.id.tool_bar)
-
-        val inflater = LayoutInflater.from(this)
+        val inflater = LayoutInflater.from(requireContext())
         internetErrorView = inflater.inflate(R.layout.internet_error_item, mainView, false)
         searchErrorView = inflater.inflate(R.layout.search_error_item, mainView, false)
 
@@ -83,8 +66,8 @@ class SearchActivity : AppCompatActivity() {
         internetErrorView.isVisible = false
         searchErrorView.isVisible = false
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
@@ -112,7 +95,7 @@ class SearchActivity : AppCompatActivity() {
             viewModel.clearHistory()
         }
 
-        viewModel.state.observe(this) { state ->
+        viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SearchViewModel.SearchState.HistoryEmpty -> {
                     if (currentQuery.isEmpty()) {
@@ -130,9 +113,6 @@ class SearchActivity : AppCompatActivity() {
                 is SearchViewModel.SearchState.Content -> showTracks(state.tracks)
                 is SearchViewModel.SearchState.Error -> handleError(state.error)
             }
-        }
-        toolBar.setNavigationOnClickListener {
-            this.finish()
         }
     }
 
@@ -205,10 +185,13 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun navigateToPlayer(track: Track) {
-        val intent = Intent(this, AudioPlayer::class.java).apply {
-            putExtra(KEY, gson.toJson(track))
+        val bundle = Bundle().apply {
+            putString(KEY, gson.toJson(track))
         }
-        startActivity(intent)
+        findNavController().navigate(
+            R.id.action_search_to_player,
+            bundle
+        )
     }
 
     private fun clickDebounce(): Boolean {
