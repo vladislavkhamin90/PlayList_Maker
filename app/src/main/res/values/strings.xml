@@ -6,6 +6,7 @@
     <string name="white_theme">Белая тема</string>
     <string name="dark_theme">Тёмная тема</string>
     <string name="share_app">Поделиться приложением</string>
+    <string name="share">Поделиться</string>
     <string name="support">Написать в поддержку</string>
     <string name="user_agreement">Пользовательское соглашение</string>
     <string name="settings">Настройки</string>
@@ -29,4 +30,46 @@
     <string name="new_playlist">Новый плейлист</string>
     <string name="featured_tracks">Избранные треки</string>
     <string name="playlists">Плейлисты</string>
+    <string name="track_name">Trak name</string>
+    <string name="artist_name">Artist name</string>
+    <string name="zero_time">00:00</string>
+    <string name="duration">Длительность</string>
+    <string name="album">Альбом</string>
+    <string name="album_name">Название альбома</string>
+    <string name="year">Год</string>
+    <string name="genre">Жанр</string>
+    <string name="country">Страна</string>
+    <string name="name_">Название*</string>
+    <string name="description">Описание</string>
+    <string name="create">Создать</string>
+    <string name="exit_dialog_title">Завершить создание плейлиста?</string>
+    <string name="exit_dialog_message">Все несохраненные данные будут потеряны</string>
+    <string name="exit_dialog_cancel">Отмена</string>
+    <string name="exit_dialog_confirm">Завершить</string>
+    <string name="playlist_created_success">Плейлист \"%s\" создан</string>
+    <string name="playlist_cover">Обложка плейлиста</string>
+    <string name="select_playlist">Добавить в плейлист</string>
+    <string name="add_playlist">"Добавлено в плейлист "</string>
+    <string name="already_added_playlist">"Трек уже добавлен в плейлист "</string>
+    <string name="error">"Ошибка "</string>
+    <plurals name="tracks_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d треков</item>
+    </plurals>
+
+    <string name="delete_track_title">Удаление трека</string>
+    <string name="delete_track_message">Хотите удалить трек из плейлиста?</string>
+    <string name="yes">ДА</string>
+    <string name="no">НЕТ</string>
+    <string name="tracks">Треки</string>
+    <string name="edit">Редактировать информацию</string>
+    <string name="delete">Удалить</string>
+    <string name="edit_playlist">Редактировать</string>
+    <string name="save">Сохранить</string>
+    <string name="edit_playlist_title">Редактировать плейлист</string>
+    <string name="empty_playlist_message">В этом плейлисте нет списка треков, которым можно поделиться</string>
+    <string name="empty_playlist">Ваш плейлист пуст</string>
+    <string name="empty_playlist_share_message">В данном плейлисте нет списка треков, которым можно поделиться.</string>
 </resources>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mediaFragment">
+
+    <fragment
+        android:id="@+id/mediaFragment"
+        android:name="com.example.playlist_maker.presentation.ui.media.MediaFragment"
+        tools:layout="@layout/fragment_media">
+
+        <action
+            android:id="@+id/action_media_to_search"
+            app:destination="@id/searchFragment" />
+
+        <action
+            android:id="@+id/action_media_to_settings"
+            app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_media_to_player"
+            app:destination="@id/playerFragment" />
+
+        <action
+            android:id="@+id/action_media_to_createPlaylist"
+            app:destination="@id/createPlaylistFragment" />
+        <action
+            android:id="@+id/action_mediaFragment_to_playlistDetailFragment"
+            app:destination="@id/playlistDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.playlist_maker.presentation.ui.search.SearchFragment"
+        tools:layout="@layout/fragment_search">
+
+        <argument
+            android:name="query"
+            android:defaultValue=""
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_search_to_media"
+            app:destination="@id/mediaFragment"
+            app:popUpTo="@id/mediaFragment"
+            app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/action_search_to_player"
+            app:destination="@id/playerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.example.playlist_maker.presentation.ui.player.AudioPlayerFragment"
+        tools:layout="@layout/fragment_audio_player">
+
+        <argument
+            android:name="trackJson"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_player_to_search"
+            app:destination="@id/searchFragment"
+            app:popUpTo="@id/searchFragment"
+            app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/action_audioPlayer_to_createPlaylist"
+            app:destination="@id/createPlaylistFragment" />
+    </fragment>
+
+
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.playlist_maker.presentation.ui.settings.SettingsFragment"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settings_to_media"
+            app:destination="@id/mediaFragment"
+            app:popUpTo="@id/mediaFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createPlaylistFragment"
+        android:name="com.example.playlist_maker.presentation.ui.media.CreatePlayListFragment"
+        tools:layout="@layout/fragment_create_playlist">
+
+        <action
+            android:id="@+id/action_createPlaylist_to_playlist"
+            app:destination="@id/mediaFragment"
+            app:popUpTo="@id/mediaFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playlistDetailFragment"
+        android:name="com.example.playlist_maker.presentation.ui.media.PlaylistDetailFragment"
+        tools:layout="@layout/fragment_playlist_detail">
+
+        <argument
+            android:name="playlistId"
+            app:argType="long" />
+
+        <action
+            android:id="@+id/action_playlistDetail_to_media"
+            app:destination="@id/mediaFragment"
+            app:popUpTo="@id/mediaFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_playlistDetailFragment_to_createPlaylistFragment"
+            app:destination="@id/createPlaylistFragment" />
+        <action
+            android:id="@+id/action_playlistDetailFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+    </fragment>
+
+</navigation>
